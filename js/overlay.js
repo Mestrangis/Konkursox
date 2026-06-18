@@ -19,6 +19,11 @@ function ajustarEscala() {
 }
 window.addEventListener('resize', ajustarEscala);
 
+// ── Detección de modo online ──────────────────────────────────────
+const _ovParams = new URLSearchParams(location.search);
+const _ovRoom   = _ovParams.get('room') || '';
+const _ovOnline = !!_ovRoom;
+
 // ── Arranque ─────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
   ajustarEscala();
@@ -32,6 +37,11 @@ window.addEventListener('DOMContentLoaded', () => {
   // Aplicar personalización guardada si existe
   const rawPers = localStorage.getItem('konkursox_personalizacion');
   if (rawPers) { try { aplicarPersonalizacion(JSON.parse(rawPers)); } catch {} }
+
+  if (_ovOnline) {
+    initOverlayOnline();
+    return;
+  }
 
   const raw = localStorage.getItem(STORAGE_KEY);
   if (raw) { try { procesarEstado(JSON.parse(raw)); } catch {} }
@@ -733,4 +743,223 @@ function mostrarMensaje(texto, tipo) {
 function ocultarMensaje() {
   const el = document.getElementById('mensaje-estado');
   if (el) el.className = '';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// OVERLAY — MODO ONLINE
+// ═══════════════════════════════════════════════════════════════
+
+const OV_VOTE_COLORES = ['#3498db', '#e67e22', '#2ecc71', '#9b59b6'];
+let _ovTimerMax = 30;
+let _ovCurrentOpts = [];
+
+function initOverlayOnline() {
+  const apiKey = (window.CONFIG?.ablyApiKey || '').trim();
+  if (!apiKey) {
+    console.error('[Overlay] Sin API key Ably');
+    return;
+  }
+
+  mostrarLobbyOverlay();
+
+  OnlineLayer.on('participants_list', (msg) => {
+    const lista = msg.payload || [];
+    const el = document.getElementById('ov-lobby-lista');
+    if (!el) return;
+    el.innerHTML = '';
+    lista.filter(p => p.role === 'sala').forEach(p => {
+      el.appendChild(_ovLobbyItem(p));
+    });
+  });
+
+  OnlineLayer.on('participant_joined', (msg) => {
+    const p = msg.payload;
+    if (!p || p.role !== 'sala') return;
+    const el = document.getElementById('ov-lobby-lista');
+    if (!el || el.querySelector(`[data-id="${p.id}"]`)) return;
+    el.appendChild(_ovLobbyItem(p));
+  });
+
+  OnlineLayer.on('participant_left', (msg) => {
+    const id = msg.payload?.id;
+    if (id) document.querySelector(`#ov-lobby-lista [data-id="${id}"]`)?.remove();
+  });
+
+  OnlineLayer.on('show_question', (msg) => {
+    const d = msg.payload;
+    _ovTimerMax    = d.timeLimit ?? 30;
+    _ovCurrentOpts = d.options   || [];
+    ocultarLobby();
+    mostrarPreguntaOnline(d.question, d.options);
+    actualizarTimerOnline(_ovTimerMax, _ovTimerMax);
+    ocultarVotosOverlay();
+  });
+
+  OnlineLayer.on('timer_tick', (msg) => {
+    actualizarTimerOnline(msg.payload?.value ?? 0, msg.payload?.max ?? _ovTimerMax);
+  });
+
+  OnlineLayer.on('vote_update', (msg) => {
+    mostrarVotosOverlay(msg.payload?.counts ?? [], msg.payload?.total ?? 0);
+  });
+
+  OnlineLayer.on('reveal_answer', (msg) => {
+    const d = msg.payload;
+    revelarRespuestaOnline(d.correctIndex ?? -1, d.scores || []);
+  });
+
+  OnlineLayer.on('next_question', () => {
+    ocultarVotosOverlay();
+    ocultarPreguntaOnline();
+    mostrarLobbyOverlay();
+    document.getElementById('ov-lobby-subtitulo').textContent = 'Siguiente pregunta…';
+  });
+
+  OnlineLayer.on('game_over', (msg) => {
+    ocultarVotosOverlay();
+    ocultarPreguntaOnline();
+    mostrarFinPartida(msg.payload?.scores || []);
+  });
+
+  OnlineLayer.connect(_ovRoom, 'overlay', apiKey, 'Overlay', false);
+}
+
+// ── Lobby overlay ─────────────────────────────────────────────
+
+function _ovLobbyItem(p) {
+  const div = document.createElement('div');
+  div.className  = 'ov-lobby-p';
+  div.dataset.id = p.id;
+  div.innerHTML  = `
+    <div class="ov-lobby-p-avatar">${(p.name || '?')[0].toUpperCase()}</div>
+    <div class="ov-lobby-p-nombre">${p.name || '?'}</div>`;
+  return div;
+}
+
+function mostrarLobbyOverlay() {
+  const el = document.getElementById('ov-lobby');
+  if (!el) return;
+  const codigoEl = document.getElementById('ov-lobby-codigo');
+  if (codigoEl) codigoEl.textContent = _ovRoom;
+  const subEl = document.getElementById('ov-lobby-subtitulo');
+  if (subEl) subEl.textContent = 'Esperando participantes…';
+  el.style.display = 'flex';
+}
+
+function ocultarLobby() {
+  const el = document.getElementById('ov-lobby');
+  if (el) el.style.display = 'none';
+}
+
+// ── Pregunta online ───────────────────────────────────────────
+
+function mostrarPreguntaOnline(pregunta, opciones) {
+  // Reutilizar el panel de tipo test existente
+  const panel = document.getElementById('panel-tipo-test');
+  if (panel) panel.style.display = 'flex';
+
+  const pregEl = document.getElementById('texto-pregunta');
+  if (pregEl) pregEl.textContent = pregunta || '';
+
+  const grid = document.getElementById('grid-opciones');
+  if (!grid) return;
+  grid.innerHTML = '';
+  (opciones || []).forEach((op, i) => {
+    if (!op) return;
+    const div = document.createElement('div');
+    div.className = 'opcion';
+    div.dataset.idx = i;
+    div.style.setProperty('--ov-cor', OV_VOTE_COLORES[i] || '#888');
+    div.innerHTML = `<span class="opcion-letra">${OV_LETRAS[i]}</span><span class="opcion-texto">${op}</span>`;
+    grid.appendChild(div);
+  });
+}
+
+function ocultarPreguntaOnline() {
+  const panel = document.getElementById('panel-tipo-test');
+  if (panel) panel.style.display = 'none';
+  document.getElementById('grid-opciones').innerHTML = '';
+  document.getElementById('texto-pregunta').textContent = '';
+}
+
+// ── Timer online ──────────────────────────────────────────────
+
+function actualizarTimerOnline(val, max) {
+  _ovTimerMax = max;
+  const numEl  = document.getElementById('num-timer');
+  const ring   = document.getElementById('ring-timer');
+  const timerEl = document.getElementById('temporizador-circular');
+
+  if (timerEl) timerEl.style.display = val > 0 ? '' : 'none';
+  if (numEl)  numEl.textContent = val;
+
+  if (ring) {
+    const circ = 2 * Math.PI * 45;
+    const frac = max > 0 ? val / max : 0;
+    ring.style.strokeDasharray  = `${circ}`;
+    ring.style.strokeDashoffset = `${circ * (1 - frac)}`;
+  }
+}
+
+// ── Barras de votos ───────────────────────────────────────────
+
+function mostrarVotosOverlay(counts, total) {
+  const el = document.getElementById('ov-vote-bars');
+  if (!el) return;
+  el.style.display = 'flex';
+  el.innerHTML = '';
+  _ovCurrentOpts.forEach((op, i) => {
+    if (!op) return;
+    const count = counts[i] ?? 0;
+    const pct   = total > 0 ? Math.round(count / total * 100) : 0;
+    const row   = document.createElement('div');
+    row.className = 'ov-vote-bar-item';
+    row.innerHTML = `
+      <div class="ov-vote-letter" style="color:${OV_VOTE_COLORES[i]}">${OV_LETRAS[i]}</div>
+      <div class="ov-vote-track">
+        <div class="ov-vote-fill" style="width:${pct}%;background:${OV_VOTE_COLORES[i]}"></div>
+      </div>
+      <div class="ov-vote-pct">${pct}%</div>`;
+    el.appendChild(row);
+  });
+}
+
+function ocultarVotosOverlay() {
+  const el = document.getElementById('ov-vote-bars');
+  if (el) el.style.display = 'none';
+}
+
+// ── Revelar respuesta ─────────────────────────────────────────
+
+function revelarRespuestaOnline(correctIdx, scores) {
+  // Destacar opción correcta en el grid
+  document.querySelectorAll('#grid-opciones .opcion').forEach((el) => {
+    const idx = parseInt(el.dataset.idx ?? '-1');
+    if (idx === correctIdx)   el.classList.add('ov-opcion-correcta');
+    else                      el.classList.add('ov-opcion-incorrecta');
+  });
+
+  // Ocultar timer
+  const timerEl = document.getElementById('temporizador-circular');
+  if (timerEl) timerEl.style.display = 'none';
+
+  // Mostrar top 3 en mensaje-estado
+  if (scores.length > 0) {
+    const top3 = scores.slice(0, 3);
+    const medals = ['🥇', '🥈', '🥉'];
+    const html = top3.map((s, i) => `${medals[i]} ${s.name} — ${s.total} pts`).join('   ');
+    mostrarMensaje(html, 'info');
+  }
+}
+
+// ── Fin de partida ────────────────────────────────────────────
+
+function mostrarFinPartida(scores) {
+  ocultarPreguntaOnline();
+  ocultarLobby();
+
+  const medals = ['🥇', '🥈', '🥉'];
+  const top3   = scores.slice(0, 3);
+  const html   = top3.map((s, i) => `${medals[i]} ${s.name}: ${s.total} pts`).join('\n');
+  mostrarMensaje('🏁 ¡FIN! ' + html.replace(/\n/g, '   '), 'ok');
 }

@@ -263,75 +263,12 @@ function cerrarSala() {
 
 // ── Render: info de sala en la pestaña ─────────────────────────
 function renderSalaInfo() {
-  const el = document.getElementById('sala-info-panel');
-  if (!el) return;
-
-  if (window.appMode === 'local' || !window.currentRoom) {
-    el.innerHTML = `
-      <div style="text-align:center;padding:20px;color:var(--dim)">
-        <div style="font-size:32px;margin-bottom:8px">📡</div>
-        <p>Sin sala activa. Selecciona un <strong>Modo Online</strong> para crear una sala.</p>
-      </div>`;
-    return;
-  }
-
-  const base = location.origin + location.pathname.replace('panel.html', '');
-  const salaUrl    = `${base}sala.html?room=${window.currentRoom}`;
-  const overlayUrl = `${base}overlay.html?room=${window.currentRoom}&mode=${window.appMode}`;
-  const modoLabel = window.appMode === 'online-lan' ? '🌐 WiFi local' : '🌍 Internet';
-  const wsStatus = (typeof OnlineLayer !== 'undefined' && OnlineLayer.isConnected())
-    ? '<span style="color:var(--verde)">● Conectado</span>'
-    : '<span style="color:var(--naranja)">◌ Conectando…</span>';
-
-  el.innerHTML = `
-    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px">
-      <span style="font-family:'Barlow Condensed',sans-serif;font-size:48px;font-weight:900;letter-spacing:8px;color:var(--dorado)">${window.currentRoom}</span>
-      <div>
-        <div style="font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px">${modoLabel}</div>
-        <div style="font-size:12px">${wsStatus}</div>
-      </div>
-    </div>
-
-    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px">
-      <div style="font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px">Link participantes</div>
-      <div style="display:flex;gap:6px">
-        <input readonly value="${salaUrl}" style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:12px;color:var(--text);outline:none" />
-        <button class="btn btn-gris" onclick="copiarLink('${salaUrl}')" style="white-space:nowrap;padding:6px 12px;font-size:12px">Copiar</button>
-      </div>
-    </div>
-
-    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px">
-      <div style="font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px">URL Overlay (OBS / navegador)</div>
-      <div style="display:flex;gap:6px">
-        <input readonly value="${overlayUrl}" style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:12px;color:var(--text);outline:none" />
-        <button class="btn btn-gris" onclick="copiarLink('${overlayUrl}')" style="white-space:nowrap;padding:6px 12px;font-size:12px">Copiar</button>
-      </div>
-    </div>
-
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn btn-dorado" onclick="abrirOverlay()">🖥 Abrir Overlay</button>
-      <button class="btn btn-rojo"   onclick="cerrarSala()">✕ Cerrar sala</button>
-    </div>`;
+  if (typeof salaRenderEstado === 'function') { salaRenderEstado(); return; }
 }
 
 // ── Render: lista de participantes ──────────────────────────────
 function renderSalaParticipantes() {
-  const el = document.getElementById('sala-participantes-list');
-  if (!el) return;
-  const salas = [..._participantes.values()].filter(p => p.role === 'sala');
-  const ctr   = document.getElementById('sala-participantes-count');
-  if (ctr) ctr.textContent = salas.length;
-  el.innerHTML = '';
-  salas.forEach(p => {
-    const div = document.createElement('div');
-    div.className = 'sala-participante';
-    div.innerHTML = `
-      <div class="sala-participante-avatar">${(p.name || '?')[0].toUpperCase()}</div>
-      <span class="sala-participante-nombre">${p.name || '?'}</span>
-      ${p.hasCam ? '<span title="Cámara">📷</span>' : ''}
-      ${p.voted  ? '<span title="Ya votó">✅</span>'  : ''}`;
-    el.appendChild(div);
-  });
+  if (typeof salaRenderParticipantes === 'function') { salaRenderParticipantes(); return; }
 }
 
 // ── Copiar link al portapapeles ─────────────────────────────────

@@ -1018,27 +1018,141 @@
     </div>
 
     <!-- ════════════════════════════════════════════════
-         PESTAÑA: SALA ONLINE
+         PESTAÑA: SALA ONLINE  (Modo Kahoot)
     ════════════════════════════════════════════════ -->
     <div id="tab-sala" class="tab-panel">
-      <div style="display:flex;flex-direction:column;gap:14px;padding:4px 0">
+      <div class="sala-layout">
 
-        <!-- Info y controles de sala -->
-        <div id="sala-info-panel" class="card">
-          <div style="text-align:center;padding:20px;color:var(--text-muted)">
-            <div style="font-size:32px;margin-bottom:8px">📡</div>
-            <p>Sin sala activa. Haz clic en <strong>💻 Local</strong> en la barra superior para crear una sala online.</p>
-          </div>
-        </div>
+        <!-- ══ COLUMNA IZQUIERDA: gestión de sala ══ -->
+        <div class="sala-col sala-col-left">
 
-        <!-- Participantes -->
-        <div class="card">
-          <div class="card-title">
-            <span class="ct-icon">👥</span> Participantes
-            <span id="sala-participantes-count" style="margin-left:6px;font-size:12px;color:var(--text-muted);font-weight:400">0</span>
+          <!-- Estado cerrado -->
+          <div id="sala-estado-cerrado" class="card">
+            <div style="text-align:center;padding:16px 8px;color:var(--text-muted)">
+              <div style="font-size:28px;margin-bottom:8px">📡</div>
+              <p style="font-size:12px;line-height:1.6">Sin sala activa.<br>Usa <strong style="color:var(--dorado)">💻 Local</strong> en la barra superior para crear una sala online.</p>
+            </div>
           </div>
-          <div id="sala-participantes-list" style="display:flex;flex-direction:column;gap:4px;margin-top:8px"></div>
-        </div>
+
+          <!-- Estado abierto -->
+          <div id="sala-estado-abierto" class="card" style="display:none">
+            <div class="sala-codigo-display" id="sala-codigo-display">----</div>
+            <div id="sala-ws-status" style="text-align:center;font-size:12px;margin-bottom:8px"></div>
+
+            <div style="margin-bottom:8px">
+              <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Link participantes</div>
+              <div style="display:flex;gap:6px">
+                <input id="sala-link-input" readonly class="input-field" style="flex:1;font-size:11px;padding:5px 8px" />
+                <button class="btn btn-gris btn-sm" onclick="salaCopiarLink()">Copiar</button>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <button class="btn btn-dorado btn-sm" onclick="abrirOverlay()" style="flex:1">🖥 Overlay</button>
+              <button class="btn btn-rojo btn-sm"   onclick="cerrarSala()" style="flex:1">✕ Cerrar</button>
+            </div>
+          </div>
+
+          <!-- Participantes -->
+          <div class="card" style="flex:1;overflow:hidden;display:flex;flex-direction:column">
+            <div class="card-title">
+              <span class="ct-icon">👥</span> Participantes
+              <span id="sala-p-count" style="margin-left:6px;font-size:12px;color:var(--text-muted);font-weight:400">0</span>
+            </div>
+            <div id="sala-p-list" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:4px;margin-top:6px"></div>
+          </div>
+
+        </div><!-- /col-left -->
+
+        <!-- ══ COLUMNA CENTRAL: editor de pregunta ══ -->
+        <div class="sala-col sala-col-center">
+
+          <div class="card" style="flex:1;display:flex;flex-direction:column;gap:8px">
+            <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+              <span><span class="ct-icon">📝</span> Pregunta</span>
+              <span id="sala-q-num" style="font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--text-muted)">P1 — lista</span>
+            </div>
+
+            <textarea id="sala-q-text" class="input-field" rows="3"
+                      placeholder="Escribe la pregunta aquí…"
+                      oninput="salaActualizarEstado()"></textarea>
+
+            <div id="sala-q-opciones" style="display:flex;flex-direction:column;gap:5px"></div>
+
+            <div style="display:flex;align-items:center;gap:8px;margin-top:2px">
+              <label style="font-size:12px;color:var(--text-muted);white-space:nowrap">Tiempo</label>
+              <input type="range" id="sala-q-tiempo" min="10" max="60" value="30"
+                     style="flex:1"
+                     oninput="document.getElementById('sala-q-tiempo-lbl').textContent=this.value+'s'; salaActualizarEstado()" />
+              <span id="sala-q-tiempo-lbl" style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--dorado);min-width:32px">30s</span>
+            </div>
+
+            <!-- Botones según fase -->
+            <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px">
+              <!-- fase: lobby -->
+              <div id="sala-btn-fase-lobby">
+                <button class="btn btn-dorado btn-full" onclick="salaEnviarPregunta()">▶ Enviar pregunta</button>
+                <div style="display:flex;gap:6px;margin-top:6px">
+                  <button class="btn btn-gris btn-sm" onclick="salaGuardarBanco()" style="flex:1">💾 Guardar</button>
+                </div>
+              </div>
+              <!-- fase: pregunta -->
+              <div id="sala-btn-fase-pregunta" style="display:none">
+                <div style="display:flex;gap:6px">
+                  <button class="btn btn-verde" onclick="salaRevelar()" style="flex:1">✔ Revelar</button>
+                  <button class="btn btn-naranja" onclick="salaForzarRevelar()" style="flex:1">⏹ Forzar</button>
+                </div>
+              </div>
+              <!-- fase: revelada -->
+              <div id="sala-btn-fase-revelada" style="display:none">
+                <div style="display:flex;gap:6px">
+                  <button class="btn btn-dorado" onclick="salaSiguiente()" style="flex:1">➡ Siguiente</button>
+                  <button class="btn btn-rojo"   onclick="salaFinPartida()" style="flex:1">🏁 Fin</button>
+                </div>
+              </div>
+              <!-- fase: fin -->
+              <div id="sala-btn-fase-fin" style="display:none">
+                <button class="btn btn-dorado btn-full" onclick="salaNuevaPartida()">🔄 Nueva partida</button>
+              </div>
+            </div>
+
+            <!-- Banco de preguntas -->
+            <div style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px">
+              <div class="card-title" style="margin-bottom:6px"><span class="ct-icon">📚</span> Banco</div>
+              <div id="sala-banco-list" class="banco-lista" style="max-height:140px;overflow-y:auto"></div>
+              <div class="fila-btn" style="margin-top:6px">
+                <button class="btn btn-gris btn-sm" onclick="salaExportarBanco()">📤</button>
+                <label class="btn btn-gris btn-sm" style="cursor:pointer">
+                  📥<input type="file" accept=".json" onchange="salaImportarBanco(event)" style="display:none">
+                </label>
+                <button class="btn btn-rojo btn-sm"  onclick="salaBancoLimpiar()">🗑</button>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /col-center -->
+
+        <!-- ══ COLUMNA DERECHA: votos + marcador ══ -->
+        <div class="sala-col sala-col-right">
+
+          <!-- Barras de votos -->
+          <div class="card">
+            <div class="card-title" style="display:flex;justify-content:space-between">
+              <span><span class="ct-icon">🗳</span> Votos</span>
+              <span id="sala-votos-contador" style="font-size:12px;color:var(--text-muted)">0 / 0</span>
+            </div>
+            <div id="sala-votos-barras" style="display:flex;flex-direction:column;gap:6px;margin-top:8px"></div>
+          </div>
+
+          <!-- Resultados + marcador -->
+          <div class="card" style="flex:1;overflow:hidden;display:flex;flex-direction:column">
+            <div class="card-title"><span class="ct-icon">🏆</span> Marcador</div>
+            <div id="sala-marcador-list" style="flex:1;overflow-y:auto;margin-top:8px;font-size:12px;display:flex;flex-direction:column;gap:4px">
+              <div style="color:var(--text-muted);text-align:center;padding:12px">Sin puntuaciones aún</div>
+            </div>
+          </div>
+
+        </div><!-- /col-right -->
 
       </div>
     </div>
@@ -1071,8 +1185,10 @@
 <script src="js/tab-precio-justo.js"></script>
 <script src="js/tab-rosco.js"></script>
 <script src="js/tab-biblioteca.js"></script>
+<script src="js/tab-sala.js"></script>
 <script>
   window.addEventListener('DOMContentLoaded', () => {
+    initTabSala();
     gmInit();
     escInit();
     sfxSisInit();

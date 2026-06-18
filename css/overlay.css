@@ -862,3 +862,122 @@ html, body {
 /* Los elementos dentro recuperan pointer-events donde los necesiten */
 #ov-contenido-escalable > * { pointer-events: auto; }
 /* El fondo no está dentro del escalable, así que las cámaras tampoco se escalan */
+
+/* ════════════════════════════════════════════════════════════
+   ONLINE OVERLAY — Lobby + Barras de votos
+════════════════════════════════════════════════════════════ */
+
+/* Lobby (pantalla de espera antes de la primera pregunta) */
+#ov-lobby {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  background: rgba(0,0,0,.82);
+  z-index: 80;
+}
+#ov-lobby-codigo {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 120px;
+  font-weight: 900;
+  letter-spacing: 16px;
+  color: var(--dorado, #f0a500);
+  line-height: 1;
+  text-shadow: 0 0 40px rgba(240,165,0,.4);
+}
+#ov-lobby-subtitulo {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: rgba(255,255,255,.6);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+#ov-lobby-lista {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  max-width: 1100px;
+  padding: 0 40px;
+}
+.ov-lobby-p {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  animation: ov-lobby-entrada .35s ease both;
+}
+@keyframes ov-lobby-entrada {
+  from { opacity: 0; transform: scale(.7) translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+.ov-lobby-p-avatar {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: var(--dorado, #f0a500);
+  color: #0c0e13;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 32px; font-weight: 900;
+}
+.ov-lobby-p-nombre {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 18px; font-weight: 700;
+  color: #fff;
+  max-width: 100px;
+  text-align: center;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* Barras de votos en tiempo real */
+#ov-vote-bars {
+  position: absolute;
+  bottom: 230px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(820px, 90vw);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 30;
+  pointer-events: none;
+}
+.ov-vote-bar-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ov-vote-letter {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 22px; font-weight: 900;
+  width: 28px; text-align: center;
+  flex-shrink: 0;
+}
+.ov-vote-track {
+  flex: 1;
+  height: 18px;
+  background: rgba(255,255,255,.12);
+  border-radius: 9px;
+  overflow: hidden;
+}
+.ov-vote-fill {
+  height: 100%;
+  border-radius: 9px;
+  transition: width .5s ease;
+  min-width: 4px;
+}
+.ov-vote-pct {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 16px; font-weight: 700;
+  color: rgba(255,255,255,.7);
+  min-width: 38px;
+  text-align: right;
+}
+
+/* Opción correcta reveal */
+.ov-opcion-correcta  { background: var(--verde, #2ecc71) !important; }
+.ov-opcion-incorrecta { opacity: .4; }

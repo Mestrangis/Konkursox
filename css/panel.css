@@ -1730,3 +1730,91 @@ input[type="file"] {
   min-width: 28px;
   text-align: right;
 }
+
+/* ════════════════════════════════════════════════════════════
+   PESTAÑA SALA — Layout 3 columnas (Kahoot mode)
+════════════════════════════════════════════════════════════ */
+.sala-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr 260px;
+  gap: 12px;
+  height: 100%;
+  overflow: hidden;
+}
+.sala-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.sala-col-left  { min-width: 0; }
+.sala-col-center { min-width: 0; }
+.sala-col-right { min-width: 0; }
+
+/* Código grande */
+.sala-codigo-display {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 48px;
+  font-weight: 900;
+  letter-spacing: 8px;
+  color: var(--dorado);
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+/* Participante en sala */
+.sala-p-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 6px;
+  border-radius: 6px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+}
+.sala-p-avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--dorado);
+  color: var(--bg1);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px; font-weight: 800;
+  flex-shrink: 0;
+}
+.sala-p-info  { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.sala-p-nombre { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sala-p-score  { font-size: 11px; color: var(--text-muted); }
+.sala-p-badges { display: flex; gap: 3px; align-items: center; }
+.badge-votado  { font-size: 11px; color: var(--verde); }
+.sala-kick-btn { padding: 2px 6px !important; font-size: 10px !important; }
+
+/* Banco de preguntas (sala) */
+.banco-item {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 8px;
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 5px; cursor: pointer;
+}
+.banco-item:hover { border-color: var(--dorado); }
+.banco-item-text {
+  flex: 1; font-size: 11px; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+}
+
+/* Marcador / resultados */
+.sala-seccion-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .5px; color: var(--text-muted); padding: 4px 0 2px;
+}
+.sala-resultado-fila {
+  display: flex; align-items: center; gap: 6px;
+  padding: 4px 6px; border-radius: 5px;
+  background: var(--bg3);
+}
+
+/* Barras de votos (también usadas en sala y panel) */
+.voto-barra-row {
+  display: flex; align-items: center; gap: 6px;
+}

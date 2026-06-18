@@ -52,12 +52,6 @@
     <div class="label-sala">Participantes</div>
     <div class="lista-participantes" id="lobby-lista"></div>
   </div>
-
-  <!-- Modo 2 (mismo WiFi): botón de cámara; se muestra solo si el overlay lo activa -->
-  <button id="btn-camara" class="btn-sala btn-azul" onclick="activarCamara()" style="display:none;max-width:400px">
-    📷 Activar cámara
-  </button>
-  <video id="local-video" autoplay muted playsinline></video>
 </section>
 
 <!-- ══════════════════════════════════════════
@@ -69,16 +63,33 @@
     <span id="game-conexion-texto">Conectado</span>
   </div>
 
+  <!-- Timer del participante -->
+  <div id="game-timer-wrap" style="display:none;width:100%;margin-bottom:8px">
+    <div style="height:6px;background:rgba(255,255,255,.12);border-radius:3px;overflow:hidden">
+      <div id="game-timer-bar" style="height:100%;background:var(--verde);border-radius:3px;transition:width 1s linear;width:100%"></div>
+    </div>
+    <div id="game-timer-num" style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:var(--verde);text-align:center;margin-top:4px">--</div>
+  </div>
+
   <div id="pregunta-display" class="pregunta-sala" style="display:none"></div>
 
   <div id="opciones-container" class="opciones-voto"></div>
 
-  <div id="voto-confirmado" class="voto-enviado" style="display:none">
-    <div class="check">✅</div>
-    <p>Voto enviado. Esperando resultado…</p>
-  </div>
+  <div id="msg-game" class="msg-sala" style="margin-top:8px;font-size:13px"></div>
+</section>
 
-  <div id="msg-game" class="msg-sala" style="margin-top:8px"></div>
+<!-- ══════════════════════════════════════════
+     PANTALLA 4: Resultado personal
+═══════════════════════════════════════════ -->
+<section id="screen-resultado" class="screen">
+  <div id="resultado-icono" style="font-size:72px;margin-bottom:8px;text-align:center">⏳</div>
+  <div id="resultado-titulo" style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;text-align:center;color:var(--dorado);margin-bottom:12px">–</div>
+  <div class="card-sala" style="text-align:center;width:100%;max-width:340px">
+    <div id="resultado-puntos-ronda" style="font-family:'Barlow Condensed',sans-serif;font-size:40px;font-weight:900;color:var(--dorado);line-height:1.1">+0 pts</div>
+    <div id="resultado-puntos-total" style="font-size:14px;color:var(--text-muted);margin-top:6px">Total: 0 pts</div>
+    <div id="resultado-posicion" style="font-size:13px;color:var(--text-muted);margin-top:4px">Posición: –</div>
+  </div>
+  <div id="resultado-espera" class="msg-sala" style="margin-top:16px;font-size:13px;color:var(--text-muted)">Esperando siguiente pregunta…</div>
 </section>
 
 <!-- ── Toast ── -->
@@ -90,27 +101,29 @@
 <script src="https://cdn.ably.com/lib/ably.min-2.js"></script>
 <script src="js/online.js"></script>
 <script>
-// ═══════════════════════════════════════════════════════════════
-// sala.html — lógica de participante
-// ═══════════════════════════════════════════════════════════════
 'use strict';
 
-// ── Estado local ──────────────────────────────────────────────
-let myName     = '';
-let myId       = '';
-let roomCode   = '';
-let hasCam     = false;
-let voted      = false;
-let localStream = null;
-let peerConns  = {};   // { overlayId: RTCPeerConnection }
-let lastOpts   = [];   // array de strings con las opciones actuales
+const LETRAS = ['A', 'B', 'C', 'D', 'E'];
 
-// ── Leer params de URL (opcional: ?room=KXBT) ─────────────────
+// ── Estado local ──────────────────────────────────────────────
+let myName             = '';
+let myId               = '';
+let roomCode           = '';
+let myVote             = -1;   // -1 = sin voto
+let myPoints           = 0;
+let currentQuestionNum = 0;
+let timerMax           = 30;
+let timerInterval      = null;
+let lastOpciones       = [];
+let localStream        = null;
+let peerConns          = {};
+
+// ── Leer room de URL ──────────────────────────────────────────
 (function () {
   const p = new URLSearchParams(location.search);
   if (p.get('room')) {
     const el = document.getElementById('inp-codigo');
-    if (el) { el.value = p.get('room').toUpperCase(); }
+    if (el) el.value = p.get('room').toUpperCase();
   }
 })();
 
@@ -132,19 +145,18 @@ function toastSala(msg, tipo = 'info') {
 }
 
 function setConexion(el, estado) {
-  const estados = ['conectado', 'conectando', 'error'];
-  estados.forEach(e => el.classList.remove(e));
+  ['conectado', 'conectando', 'error'].forEach(e => el.classList.remove(e));
   el.classList.add(estado);
 }
 
-// ── Conectar ─────────────────────────────────────────────────
+// ── Conectar ──────────────────────────────────────────────────
 function unirse() {
-  const codigo = (document.getElementById('inp-codigo')?.value || '').trim().toUpperCase();
-  const nombre = (document.getElementById('inp-nombre')?.value || '').trim();
+  const codigo  = (document.getElementById('inp-codigo')?.value || '').trim().toUpperCase();
+  const nombre  = (document.getElementById('inp-nombre')?.value || '').trim();
   const errorEl = document.getElementById('estado-join');
 
   if (codigo.length < 2) { if (errorEl) errorEl.textContent = 'Escribe el código de sala.'; return; }
-  if (!nombre) { if (errorEl) errorEl.textContent = 'Escribe tu nombre.'; return; }
+  if (!nombre)            { if (errorEl) errorEl.textContent = 'Escribe tu nombre.'; return; }
   if (errorEl) errorEl.textContent = '';
 
   roomCode = codigo;
@@ -166,19 +178,24 @@ function unirse() {
 
 function _initOnline(apiKey) {
   OnlineLayer.on('connected', () => {
+    myId = OnlineLayer.getMyId();
     setConexion(document.getElementById('join-conexion'), 'conectado');
     document.getElementById('join-conexion-texto').textContent = 'Conectado';
   });
 
   OnlineLayer.on('disconnected', () => {
+    clearInterval(timerInterval);
+    _stopTimerVisual();
     setConexion(document.getElementById('join-conexion'), 'conectando');
     document.getElementById('join-conexion-texto').textContent = 'Reconectando…';
-    setConexion(document.getElementById('game-conexion'), 'conectando');
-    document.getElementById('game-conexion-texto').textContent = 'Reconectando…';
+    const gc = document.getElementById('game-conexion');
+    if (gc) setConexion(gc, 'conectando');
+    const gt = document.getElementById('game-conexion-texto');
+    if (gt) gt.textContent = 'Reconectando…';
   });
 
   OnlineLayer.on('hello_ack', (msg) => {
-    myId = msg.payload?.id || '';
+    myId = msg.payload?.id || OnlineLayer.getMyId();
   });
 
   OnlineLayer.on('participants_list', (msg) => {
@@ -193,45 +210,106 @@ function _initOnline(apiKey) {
     removeLobbyItem(msg.payload?.id);
   });
 
-  // Estado de juego desde el panel
-  OnlineLayer.on('state', (msg) => {
-    procesarEstadoJuego(msg.payload || msg);
+  // ── Mensajes del juego ────────────────────────────────────
+
+  OnlineLayer.on('show_question', (msg) => {
+    const d = msg.payload;
+    currentQuestionNum = d.questionNum ?? (currentQuestionNum + 1);
+    timerMax    = d.timeLimit ?? 30;
+    myVote      = -1;
+    lastOpciones = d.options || [];
+
+    mostrarScreen('screen-game');
+    setConexion(document.getElementById('game-conexion'), 'conectado');
+    document.getElementById('game-conexion-texto').textContent = 'Conectado';
+
+    const pregEl = document.getElementById('pregunta-display');
+    if (pregEl) { pregEl.style.display = 'block'; pregEl.textContent = d.question || ''; }
+
+    renderOpciones(lastOpciones);
+
+    const msgEl = document.getElementById('msg-game');
+    if (msgEl) msgEl.textContent = '¡Vota ahora!';
+
+    _startTimerVisual(timerMax);
   });
 
-  OnlineLayer.on('voting_started', (msg) => {
-    iniciarVotacion(msg.payload?.numOptions ?? 4);
+  OnlineLayer.on('timer_tick', (msg) => {
+    const v = msg.payload?.value ?? 0;
+    const m = msg.payload?.max   ?? timerMax;
+    timerMax = m;
+    clearInterval(timerInterval); // usar el tick del servidor como fuente de verdad
+    _setTimerVisual(v, m);
   });
 
-  OnlineLayer.on('voting_stopped', () => {
-    detenerVotacion();
+  OnlineLayer.on('reveal_answer', (msg) => {
+    const d = msg.payload;
+    clearInterval(timerInterval);
+    _stopTimerVisual();
+
+    const correctIdx = d.correctIndex ?? -1;
+    const scoresArr  = d.scores       || [];
+
+    // Resultado propio
+    const myResult = scoresArr.find(s => s.id === myId);
+    const correct  = myVote !== -1 && myVote === correctIdx;
+    const points   = myResult?.roundPoints ?? (correct ? 1000 : 0);
+    myPoints       = myResult?.total ?? (myPoints + points);
+    const rank     = myResult
+      ? scoresArr.findIndex(s => s.id === myId) + 1
+      : scoresArr.length + 1;
+
+    mostrarResultado(correct, points, rank);
   });
 
-  // Señalización WebRTC (overlay envía offer al participante)
-  OnlineLayer.on('webrtc_offer', (msg) => {
-    if (hasCam) manejarWebRTCOffer(msg.payload);
+  OnlineLayer.on('next_question', () => {
+    // El panel enviará show_question a continuación; preparamos la transición
+    mostrarScreen('screen-lobby');
+    myVote = -1;
+    clearInterval(timerInterval);
+    _stopTimerVisual();
+    const msgEl = document.getElementById('msg-game');
+    if (msgEl) msgEl.textContent = '';
   });
-  OnlineLayer.on('webrtc_ice', (msg) => {
-    if (hasCam) manejarWebRTCIce(msg.payload);
+
+  OnlineLayer.on('game_over', (msg) => {
+    clearInterval(timerInterval);
+    _stopTimerVisual();
+    const scoresArr = msg.payload?.scores || [];
+    const myResult  = scoresArr.find(s => s.id === myId);
+    const rank      = scoresArr.findIndex(s => s.id === myId) + 1;
+    mostrarFinJuego(myResult?.total ?? myPoints, rank > 0 ? rank : scoresArr.length + 1, scoresArr.length);
   });
+
+  OnlineLayer.on('kicked', (msg) => {
+    // Sin payload de id significa que el mensaje nos incluye; o comprobamos el id
+    const targetId = msg.payload?.id;
+    if (targetId && targetId !== myId) return;
+    clearInterval(timerInterval);
+    OnlineLayer.disconnect();
+    mostrarScreen('screen-join');
+    document.getElementById('estado-join').textContent = 'Has sido expulsado de la sala.';
+    toastSala('Expulsado de la sala', 'error');
+  });
+
+  OnlineLayer.on('webrtc_offer', (msg) => { if (localStream) manejarWebRTCOffer(msg.payload); });
+  OnlineLayer.on('webrtc_ice',   (msg) => { if (localStream) manejarWebRTCIce(msg.payload); });
 
   OnlineLayer.connect(roomCode, 'sala', apiKey, myName, false);
 }
 
-// ── Lobby: lista de participantes ─────────────────────────────
+// ── Lobby ─────────────────────────────────────────────────────
 function renderLobbyLista(lista) {
   const el = document.getElementById('lobby-lista');
   if (!el) return;
   el.innerHTML = '';
-  lista.filter(p => p.role === 'sala').forEach(p => {
-    el.appendChild(_itemParticipante(p));
-  });
+  lista.filter(p => p.role === 'sala').forEach(p => el.appendChild(_itemParticipante(p)));
 }
 
 function addLobbyItem(p) {
-  if (p.role !== 'sala') return;
+  if (!p || p.role !== 'sala') return;
   const el = document.getElementById('lobby-lista');
-  if (!el) return;
-  if (el.querySelector(`[data-id="${p.id}"]`)) return;
+  if (!el || el.querySelector(`[data-id="${p.id}"]`)) return;
   el.appendChild(_itemParticipante(p));
 }
 
@@ -240,153 +318,117 @@ function removeLobbyItem(id) {
 }
 
 function _itemParticipante(p) {
-  const div = document.createElement('div');
-  div.className = 'participante-item';
+  const div      = document.createElement('div');
+  div.className  = 'participante-item';
   div.dataset.id = p.id;
-  const av = document.createElement('div');
-  av.className = 'participante-avatar';
+  const av       = document.createElement('div');
+  av.className   = 'participante-avatar';
   av.textContent = (p.name || '?')[0].toUpperCase();
-  const name = document.createElement('span');
-  name.textContent = p.name || '?';
+  const nm       = document.createElement('span');
+  nm.textContent = p.name || '?';
   div.appendChild(av);
-  div.appendChild(name);
+  div.appendChild(nm);
   return div;
 }
 
-// ── Estado de juego ───────────────────────────────────────────
-function procesarEstadoJuego(datos) {
-  if (!datos) return;
-
-  // Si hay pregunta activa → pasar a screen-game
-  const tienePregunta =
-    (datos.tipoTest?.visible) ||
-    (datos.siNo?.visible) ||
-    (datos.precioJusto?.visible) ||
-    datos.modo === 'rosco';
-
-  if (tienePregunta) {
-    mostrarScreen('screen-game');
-    setConexion(document.getElementById('game-conexion'), 'conectado');
-    document.getElementById('game-conexion-texto').textContent = 'Conectado';
-  }
-
-  // Mostrar pregunta según modo
-  const modo = datos.modo;
-  const pregEl = document.getElementById('pregunta-display');
-  const optsEl = document.getElementById('opciones-container');
-
-  if (modo === 'tipo-test' && datos.tipoTest?.visible) {
-    const tt = datos.tipoTest;
-    if (pregEl) { pregEl.style.display = 'block'; pregEl.textContent = tt.pregunta || ''; }
-    lastOpts = tt.opciones || [];
-    renderOpciones(lastOpts, false);
-
-  } else if (modo === 'si-no' && datos.siNo?.visible) {
-    const sn = datos.siNo;
-    if (pregEl) { pregEl.style.display = 'block'; pregEl.textContent = sn.pregunta || ''; }
-    lastOpts = sn.opciones || ['SÍ', 'NO'];
-    renderOpciones(lastOpts, false);
-
-  } else if (!tienePregunta) {
-    if (pregEl) { pregEl.style.display = 'none'; pregEl.textContent = ''; }
-    if (optsEl) optsEl.innerHTML = '';
-    document.getElementById('voto-confirmado').style.display = 'none';
-    voted = false;
-  }
-
-  // Cámaras (Modo 2)
-  const webrtcMode = datos._onlineMode === 'online-lan';
-  const btnCam = document.getElementById('btn-camara');
-  if (btnCam) btnCam.style.display = webrtcMode ? 'block' : 'none';
-}
-
-// ── Votación ─────────────────────────────────────────────────
-function iniciarVotacion(numOpts) {
-  voted = false;
-  document.getElementById('voto-confirmado').style.display = 'none';
-  // Mostrar opciones si ya las tenemos
-  if (lastOpts.length > 0) renderOpciones(lastOpts, false);
-  document.getElementById('msg-game').textContent = '¡Vota ahora!';
-}
-
-function detenerVotacion() {
-  // Bloquear botones
-  document.querySelectorAll('.opcion-voto').forEach(b => { b.disabled = true; });
-  document.getElementById('msg-game').textContent = 'Votación cerrada.';
-}
-
-function renderOpciones(opciones, bloqueadas) {
+// ── Opciones ──────────────────────────────────────────────────
+function renderOpciones(opciones) {
   const el = document.getElementById('opciones-container');
   if (!el) return;
-  const letras = ['A', 'B', 'C', 'D', 'E'];
   el.innerHTML = '';
-  if (voted) return;
   opciones.forEach((op, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'opcion-voto';
-    btn.disabled = bloqueadas || voted;
-    btn.innerHTML = `<span class="opcion-letra">${letras[i] || i+1}</span><span>${op}</span>`;
+    if (!op && op !== 0) return;
+    const btn      = document.createElement('button');
+    btn.className  = 'opcion-voto' + (myVote === i ? ' seleccionada' : '');
+    btn.dataset.idx = i;
+    btn.innerHTML  = `<span class="opcion-letra">${LETRAS[i]}</span><span>${op}</span>`;
     btn.addEventListener('click', () => votar(i));
     el.appendChild(btn);
   });
 }
 
 function votar(idx) {
-  if (voted) return;
-  voted = true;
-  OnlineLayer.publish({ type: 'vote', payload: { option: idx } });
+  myVote = idx;
 
-  const el = document.getElementById('opciones-container');
-  if (el) el.innerHTML = '';
-  document.getElementById('voto-confirmado').style.display = 'block';
-  document.getElementById('msg-game').textContent = '';
-  toastSala('¡Voto enviado!', 'ok');
+  // Publicar voto (o cambio de voto)
+  OnlineLayer.publish({ type: 'vote', payload: { option: idx, questionNum: currentQuestionNum } });
+
+  // Resaltar selección
+  document.querySelectorAll('#opciones-container .opcion-voto').forEach((btn, i) => {
+    btn.classList.toggle('seleccionada', i === idx);
+  });
+
+  const msgEl = document.getElementById('msg-game');
+  if (msgEl) msgEl.textContent = `Votaste ${LETRAS[idx]}. Puedes cambiar tu voto.`;
 }
 
-// ── Cámara (Modo 2 WebRTC) ────────────────────────────────────
-async function activarCamara() {
-  const btn = document.getElementById('btn-camara');
-  const video = document.getElementById('local-video');
-  try {
-    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-    if (video) { video.srcObject = localStream; video.style.display = 'block'; }
-    if (btn) btn.style.display = 'none';
-    hasCam = true;
-    // Re-anunciar con hasCam = true
-    OnlineLayer.publish({ type: 'hello', role: 'sala', name: myName, hasCam: true });
-    toastSala('Cámara activada', 'ok');
-  } catch(e) {
-    toastSala('No se pudo acceder a la cámara', 'error');
-  }
+// ── Timer visual ──────────────────────────────────────────────
+function _startTimerVisual(max) {
+  clearInterval(timerInterval);
+  _setTimerVisual(max, max);
+  document.getElementById('game-timer-wrap').style.display = 'block';
+
+  // Timer local como fallback si no llegan timer_tick del panel
+  timerInterval = setInterval(() => {
+    const numEl = document.getElementById('game-timer-num');
+    const cur   = parseInt(numEl?.textContent || '0');
+    if (isNaN(cur) || cur <= 0) { clearInterval(timerInterval); return; }
+    _setTimerVisual(cur - 1, timerMax);
+  }, 1000);
 }
 
+function _setTimerVisual(val, max) {
+  const numEl = document.getElementById('game-timer-num');
+  const barEl = document.getElementById('game-timer-bar');
+  if (numEl) numEl.textContent = val;
+  const pct   = max > 0 ? val / max : 0;
+  const color = pct > .5 ? 'var(--verde)' : pct > .25 ? 'var(--naranja)' : 'var(--rojo)';
+  if (barEl) { barEl.style.width = (pct * 100) + '%'; barEl.style.background = color; }
+  if (numEl) numEl.style.color = color;
+}
+
+function _stopTimerVisual() {
+  clearInterval(timerInterval);
+  const wrap = document.getElementById('game-timer-wrap');
+  if (wrap) wrap.style.display = 'none';
+}
+
+// ── Resultado personal ────────────────────────────────────────
+function mostrarResultado(correct, points, rank) {
+  document.getElementById('resultado-icono').textContent       = correct ? '✅' : '❌';
+  document.getElementById('resultado-titulo').textContent      = correct ? '¡Correcto!' : 'Incorrecto';
+  document.getElementById('resultado-puntos-ronda').textContent = correct ? `+${points} pts` : '0 pts';
+  document.getElementById('resultado-puntos-total').textContent = `Total: ${myPoints} pts`;
+  document.getElementById('resultado-posicion').textContent     = rank > 0 ? `Posición: #${rank}` : 'Posición: –';
+  document.getElementById('resultado-espera').textContent       = 'Esperando siguiente pregunta…';
+  mostrarScreen('screen-resultado');
+}
+
+function mostrarFinJuego(total, rank, totalPlayers) {
+  document.getElementById('resultado-icono').textContent        = rank === 1 ? '🏆' : '🎉';
+  document.getElementById('resultado-titulo').textContent       = rank === 1 ? '¡Ganaste!' : `#${rank} de ${totalPlayers}`;
+  document.getElementById('resultado-puntos-ronda').textContent = `${total} pts totales`;
+  document.getElementById('resultado-puntos-total').textContent = '';
+  document.getElementById('resultado-posicion').textContent     = '';
+  document.getElementById('resultado-espera').textContent       = '¡Gracias por jugar!';
+  mostrarScreen('screen-resultado');
+}
+
+// ── WebRTC (modo WiFi) ────────────────────────────────────────
 async function manejarWebRTCOffer(payload) {
   if (!localStream || !payload) return;
   const overlayId = payload.from;
   if (!overlayId) return;
-
   const pc = new RTCPeerConnection({ iceServers: [] });
   peerConns[overlayId] = pc;
-
   localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
-
   pc.onicecandidate = (e) => {
-    if (e.candidate) {
-      OnlineLayer.publish({
-        type: 'webrtc_ice',
-        payload: { to: overlayId, from: myId, candidate: e.candidate }
-      });
-    }
+    if (e.candidate) OnlineLayer.publish({ type: 'webrtc_ice', payload: { to: overlayId, from: myId, candidate: e.candidate } });
   };
-
   await pc.setRemoteDescription(new RTCSessionDescription(payload.sdp));
   const answer = await pc.createAnswer();
   await pc.setLocalDescription(answer);
-
-  OnlineLayer.publish({
-    type: 'webrtc_answer',
-    payload: { to: overlayId, from: myId, sdp: pc.localDescription }
-  });
+  OnlineLayer.publish({ type: 'webrtc_answer', payload: { to: overlayId, from: myId, sdp: pc.localDescription } });
 }
 
 async function manejarWebRTCIce(payload) {

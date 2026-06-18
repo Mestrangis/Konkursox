@@ -21,6 +21,13 @@
 
   <div id="fondo"></div>
 
+  <!-- Lobby online (visible antes de la primera pregunta) -->
+  <div id="ov-lobby" style="display:none">
+    <div id="ov-lobby-codigo"></div>
+    <div id="ov-lobby-subtitulo">Esperando participantes…</div>
+    <div id="ov-lobby-lista"></div>
+  </div>
+
   <!-- Contenedor escalable: todo excepto las cámaras -->
   <div id="ov-contenido-escalable">
 
@@ -97,11 +104,18 @@
     <div id="escalera-lista"></div>
   </div>
 
+  <!-- Barras de votos en tiempo real (online) -->
+  <div id="ov-vote-bars" style="display:none"></div>
+
   <div id="mensaje-estado"></div>
 
   </div><!-- /ov-contenido-escalable -->
 
 </div>
+<script>window.CONFIG = { adminPassword: 'konkursox2025', ablyApiKey: 'yQeXgw.1Jo5mQ:2YF8c1KzGBLjzIxRma7D0MwPkMM5GhYOT3r6v7FPHQ8' };</script>
+<script src="config.js" onerror=""></script>
+<script src="https://cdn.ably.com/lib/ably.min-2.js"></script>
+<script src="js/online.js"></script>
 <script src="js/overlay.js"></script>
 </body>
 </html>
