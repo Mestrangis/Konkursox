@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>KONKURSOX — Sala</title>
+  <link rel="stylesheet" href="css/sala.css" />
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     PANTALLA 1: Unirse a la sala
+═══════════════════════════════════════════ -->
+<section id="screen-join" class="screen activa">
+  <div class="logo-sala">KONKURSOX<span>Sala de participantes</span></div>
+
+  <div class="card-sala">
+    <label class="label-sala" for="inp-codigo">Código de sala</label>
+    <input id="inp-codigo" class="input-sala" type="text"
+           maxlength="4" placeholder="XXXX"
+           autocomplete="off" autocorrect="off" spellcheck="false" />
+
+    <label class="label-sala" for="inp-nombre">Tu nombre</label>
+    <input id="inp-nombre" class="input-nombre" type="text"
+           maxlength="24" placeholder="Escribe tu nombre"
+           autocomplete="off" />
+
+    <button class="btn-sala btn-dorado" onclick="unirse()">Entrar a la sala</button>
+  </div>
+
+  <div id="estado-join" class="msg-sala"></div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     PANTALLA 2: Lobby — esperando al presentador
+═══════════════════════════════════════════ -->
+<section id="screen-lobby" class="screen">
+  <div class="logo-sala">KONKURSOX<span>Sala de espera</span></div>
+
+  <div id="join-conexion" class="estado-conexion conectando">
+    <div class="estado-dot"></div>
+    <span id="join-conexion-texto">Conectando…</span>
+  </div>
+
+  <div class="card-sala" style="text-align:center">
+    <div class="label-sala" style="margin-bottom:6px">Sala</div>
+    <div class="codigo-sala" id="lobby-codigo">----</div>
+    <p class="msg-sala">Esperando al presentador…</p>
+  </div>
+
+  <div class="card-sala">
+    <div class="label-sala">Participantes</div>
+    <div class="lista-participantes" id="lobby-lista"></div>
+  </div>
+
+  <!-- Modo 2 (mismo WiFi): botón de cámara; se muestra solo si el overlay lo activa -->
+  <button id="btn-camara" class="btn-sala btn-azul" onclick="activarCamara()" style="display:none;max-width:400px">
+    📷 Activar cámara
+  </button>
+  <video id="local-video" autoplay muted playsinline></video>
+</section>
+
+<!-- ══════════════════════════════════════════
+     PANTALLA 3: Juego — pregunta + voto
+═══════════════════════════════════════════ -->
+<section id="screen-game" class="screen">
+  <div id="game-conexion" class="estado-conexion conectado" style="align-self:flex-start;padding:0 2px 8px">
+    <div class="estado-dot"></div>
+    <span id="game-conexion-texto">Conectado</span>
+  </div>
+
+  <div id="pregunta-display" class="pregunta-sala" style="display:none"></div>
+
+  <div id="opciones-container" class="opciones-voto"></div>
+
+  <div id="voto-confirmado" class="voto-enviado" style="display:none">
+    <div class="check">✅</div>
+    <p>Voto enviado. Esperando resultado…</p>
+  </div>
+
+  <div id="msg-game" class="msg-sala" style="margin-top:8px"></div>
+</section>
+
+<!-- ── Toast ── -->
+<div id="toast-sala"></div>
+
+<!-- ── Scripts ── -->
+<script>window.CONFIG = { adminPassword: 'konkursox2025', ablyApiKey: 'yQeXgw.1Jo5mQ:2YF8c1KzGBLjzIxRma7D0MwPkMM5GhYOT3r6v7FPHQ8' };</script>
+<script src="config.js" onerror=""></script>
+<script src="https://cdn.ably.com/lib/ably.min-2.js"></script>
+<script src="js/online.js"></script>
+<script>
+// ═══════════════════════════════════════════════════════════════
+// sala.html — lógica de participante
+// ═══════════════════════════════════════════════════════════════
+'use strict';
+
+// ── Estado local ──────────────────────────────────────────────
+let myName     = '';
+let myId       = '';
+let roomCode   = '';
+let hasCam     = false;
+let voted      = false;
+let localStream = null;
+let peerConns  = {};   // { overlayId: RTCPeerConnection }
+let lastOpts   = [];   // array de strings con las opciones actuales
+
+// ── Leer params de URL (opcional: ?room=KXBT) ─────────────────
+(function () {
+  const p = new URLSearchParams(location.search);
+  if (p.get('room')) {
+    const el = document.getElementById('inp-codigo');
+    if (el) { el.value = p.get('room').toUpperCase(); }
+  }
+})();
+
+// ── Utilidades ────────────────────────────────────────────────
+function mostrarScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('activa'));
+  const el = document.getElementById(id);
+  if (el) el.classList.add('activa');
+}
+
+function toastSala(msg, tipo = 'info') {
+  const c = document.getElementById('toast-sala');
+  if (!c) return;
+  const t = document.createElement('div');
+  t.className = `toast-sala-item ${tipo}`;
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 2800);
+}
+
+function setConexion(el, estado) {
+  const estados = ['conectado', 'conectando', 'error'];
+  estados.forEach(e => el.classList.remove(e));
+  el.classList.add(estado);
+}
+
+// ── Conectar ─────────────────────────────────────────────────
+function unirse() {
+  const codigo = (document.getElementById('inp-codigo')?.value || '').trim().toUpperCase();
+  const nombre = (document.getElementById('inp-nombre')?.value || '').trim();
+  const errorEl = document.getElementById('estado-join');
+
+  if (codigo.length < 2) { if (errorEl) errorEl.textContent = 'Escribe el código de sala.'; return; }
+  if (!nombre) { if (errorEl) errorEl.textContent = 'Escribe tu nombre.'; return; }
+  if (errorEl) errorEl.textContent = '';
+
+  roomCode = codigo;
+  myName   = nombre;
+
+  const apiKey = (window.CONFIG?.ablyApiKey || '').trim();
+  if (!apiKey) {
+    if (errorEl) errorEl.textContent = 'API Key de Ably no configurada. Contacta al organizador.';
+    return;
+  }
+
+  document.getElementById('lobby-codigo').textContent = roomCode;
+  mostrarScreen('screen-lobby');
+  setConexion(document.getElementById('join-conexion'), 'conectando');
+  document.getElementById('join-conexion-texto').textContent = 'Conectando…';
+
+  _initOnline(apiKey);
+}
+
+function _initOnline(apiKey) {
+  OnlineLayer.on('connected', () => {
+    setConexion(document.getElementById('join-conexion'), 'conectado');
+    document.getElementById('join-conexion-texto').textContent = 'Conectado';
+  });
+
+  OnlineLayer.on('disconnected', () => {
+    setConexion(document.getElementById('join-conexion'), 'conectando');
+    document.getElementById('join-conexion-texto').textContent = 'Reconectando…';
+    setConexion(document.getElementById('game-conexion'), 'conectando');
+    document.getElementById('game-conexion-texto').textContent = 'Reconectando…';
+  });
+
+  OnlineLayer.on('hello_ack', (msg) => {
+    myId = msg.payload?.id || '';
+  });
+
+  OnlineLayer.on('participants_list', (msg) => {
+    renderLobbyLista(msg.payload || []);
+  });
+
+  OnlineLayer.on('participant_joined', (msg) => {
+    addLobbyItem(msg.payload);
+  });
+
+  OnlineLayer.on('participant_left', (msg) => {
+    removeLobbyItem(msg.payload?.id);
+  });
+
+  // Estado de juego desde el panel
+  OnlineLayer.on('state', (msg) => {
+    procesarEstadoJuego(msg.payload || msg);
+  });
+
+  OnlineLayer.on('voting_started', (msg) => {
+    iniciarVotacion(msg.payload?.numOptions ?? 4);
+  });
+
+  OnlineLayer.on('voting_stopped', () => {
+    detenerVotacion();
+  });
+
+  // Señalización WebRTC (overlay envía offer al participante)
+  OnlineLayer.on('webrtc_offer', (msg) => {
+    if (hasCam) manejarWebRTCOffer(msg.payload);
+  });
+  OnlineLayer.on('webrtc_ice', (msg) => {
+    if (hasCam) manejarWebRTCIce(msg.payload);
+  });
+
+  OnlineLayer.connect(roomCode, 'sala', apiKey, myName, false);
+}
+
+// ── Lobby: lista de participantes ─────────────────────────────
+function renderLobbyLista(lista) {
+  const el = document.getElementById('lobby-lista');
+  if (!el) return;
+  el.innerHTML = '';
+  lista.filter(p => p.role === 'sala').forEach(p => {
+    el.appendChild(_itemParticipante(p));
+  });
+}
+
+function addLobbyItem(p) {
+  if (p.role !== 'sala') return;
+  const el = document.getElementById('lobby-lista');
+  if (!el) return;
+  if (el.querySelector(`[data-id="${p.id}"]`)) return;
+  el.appendChild(_itemParticipante(p));
+}
+
+function removeLobbyItem(id) {
+  document.querySelector(`[data-id="${id}"]`)?.remove();
+}
+
+function _itemParticipante(p) {
+  const div = document.createElement('div');
+  div.className = 'participante-item';
+  div.dataset.id = p.id;
+  const av = document.createElement('div');
+  av.className = 'participante-avatar';
+  av.textContent = (p.name || '?')[0].toUpperCase();
+  const name = document.createElement('span');
+  name.textContent = p.name || '?';
+  div.appendChild(av);
+  div.appendChild(name);
+  return div;
+}
+
+// ── Estado de juego ───────────────────────────────────────────
+function procesarEstadoJuego(datos) {
+  if (!datos) return;
+
+  // Si hay pregunta activa → pasar a screen-game
+  const tienePregunta =
+    (datos.tipoTest?.visible) ||
+    (datos.siNo?.visible) ||
+    (datos.precioJusto?.visible) ||
+    datos.modo === 'rosco';
+
+  if (tienePregunta) {
+    mostrarScreen('screen-game');
+    setConexion(document.getElementById('game-conexion'), 'conectado');
+    document.getElementById('game-conexion-texto').textContent = 'Conectado';
+  }
+
+  // Mostrar pregunta según modo
+  const modo = datos.modo;
+  const pregEl = document.getElementById('pregunta-display');
+  const optsEl = document.getElementById('opciones-container');
+
+  if (modo === 'tipo-test' && datos.tipoTest?.visible) {
+    const tt = datos.tipoTest;
+    if (pregEl) { pregEl.style.display = 'block'; pregEl.textContent = tt.pregunta || ''; }
+    lastOpts = tt.opciones || [];
+    renderOpciones(lastOpts, false);
+
+  } else if (modo === 'si-no' && datos.siNo?.visible) {
+    const sn = datos.siNo;
+    if (pregEl) { pregEl.style.display = 'block'; pregEl.textContent = sn.pregunta || ''; }
+    lastOpts = sn.opciones || ['SÍ', 'NO'];
+    renderOpciones(lastOpts, false);
+
+  } else if (!tienePregunta) {
+    if (pregEl) { pregEl.style.display = 'none'; pregEl.textContent = ''; }
+    if (optsEl) optsEl.innerHTML = '';
+    document.getElementById('voto-confirmado').style.display = 'none';
+    voted = false;
+  }
+
+  // Cámaras (Modo 2)
+  const webrtcMode = datos._onlineMode === 'online-lan';
+  const btnCam = document.getElementById('btn-camara');
+  if (btnCam) btnCam.style.display = webrtcMode ? 'block' : 'none';
+}
+
+// ── Votación ─────────────────────────────────────────────────
+function iniciarVotacion(numOpts) {
+  voted = false;
+  document.getElementById('voto-confirmado').style.display = 'none';
+  // Mostrar opciones si ya las tenemos
+  if (lastOpts.length > 0) renderOpciones(lastOpts, false);
+  document.getElementById('msg-game').textContent = '¡Vota ahora!';
+}
+
+function detenerVotacion() {
+  // Bloquear botones
+  document.querySelectorAll('.opcion-voto').forEach(b => { b.disabled = true; });
+  document.getElementById('msg-game').textContent = 'Votación cerrada.';
+}
+
+function renderOpciones(opciones, bloqueadas) {
+  const el = document.getElementById('opciones-container');
+  if (!el) return;
+  const letras = ['A', 'B', 'C', 'D', 'E'];
+  el.innerHTML = '';
+  if (voted) return;
+  opciones.forEach((op, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'opcion-voto';
+    btn.disabled = bloqueadas || voted;
+    btn.innerHTML = `<span class="opcion-letra">${letras[i] || i+1}</span><span>${op}</span>`;
+    btn.addEventListener('click', () => votar(i));
+    el.appendChild(btn);
+  });
+}
+
+function votar(idx) {
+  if (voted) return;
+  voted = true;
+  OnlineLayer.publish({ type: 'vote', payload: { option: idx } });
+
+  const el = document.getElementById('opciones-container');
+  if (el) el.innerHTML = '';
+  document.getElementById('voto-confirmado').style.display = 'block';
+  document.getElementById('msg-game').textContent = '';
+  toastSala('¡Voto enviado!', 'ok');
+}
+
+// ── Cámara (Modo 2 WebRTC) ────────────────────────────────────
+async function activarCamara() {
+  const btn = document.getElementById('btn-camara');
+  const video = document.getElementById('local-video');
+  try {
+    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    if (video) { video.srcObject = localStream; video.style.display = 'block'; }
+    if (btn) btn.style.display = 'none';
+    hasCam = true;
+    // Re-anunciar con hasCam = true
+    OnlineLayer.publish({ type: 'hello', role: 'sala', name: myName, hasCam: true });
+    toastSala('Cámara activada', 'ok');
+  } catch(e) {
+    toastSala('No se pudo acceder a la cámara', 'error');
+  }
+}
+
+async function manejarWebRTCOffer(payload) {
+  if (!localStream || !payload) return;
+  const overlayId = payload.from;
+  if (!overlayId) return;
+
+  const pc = new RTCPeerConnection({ iceServers: [] });
+  peerConns[overlayId] = pc;
+
+  localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+
+  pc.onicecandidate = (e) => {
+    if (e.candidate) {
+      OnlineLayer.publish({
+        type: 'webrtc_ice',
+        payload: { to: overlayId, from: myId, candidate: e.candidate }
+      });
+    }
+  };
+
+  await pc.setRemoteDescription(new RTCSessionDescription(payload.sdp));
+  const answer = await pc.createAnswer();
+  await pc.setLocalDescription(answer);
+
+  OnlineLayer.publish({
+    type: 'webrtc_answer',
+    payload: { to: overlayId, from: myId, sdp: pc.localDescription }
+  });
+}
+
+async function manejarWebRTCIce(payload) {
+  if (!payload?.candidate) return;
+  const pc = peerConns[payload.from];
+  if (!pc) return;
+  try { await pc.addIceCandidate(new RTCIceCandidate(payload.candidate)); } catch {}
+}
+</script>
+</body>
+</html>

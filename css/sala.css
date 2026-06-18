@@ -1,0 +1,387 @@
+/* ═══════════════════════════════════════════════════════
+   KONKURSOX — sala.css
+   Estilos para sala.html (participantes) y admin.html
+   Mobile-first, pantalla pequeña, botones grandes.
+   ═══════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;700;800;900&family=Barlow:wght@400;600&display=swap');
+
+:root {
+  --bg:      #0e0f11;
+  --bg2:     #16181c;
+  --bg3:     #1e2026;
+  --border:  #2a2d35;
+  --dorado:  #f0a500;
+  --verde:   #2ecc71;
+  --rojo:    #e74c3c;
+  --azul:    #3498db;
+  --naranja: #e67e22;
+  --morado:  #9b59b6;
+  --text:    #e8eaf0;
+  --dim:     #7a8099;
+  --muted:   #444a5a;
+  --radius:  10px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Barlow', sans-serif;
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* ── Pantallas ── */
+.screen {
+  display: none;
+  min-height: 100dvh;
+  padding: 24px 18px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+.screen.activa { display: flex; }
+
+/* ── Logo / título ── */
+.logo-sala {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 32px;
+  font-weight: 900;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--dorado);
+  text-align: center;
+  margin-bottom: 4px;
+}
+.logo-sala span {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--dim);
+  letter-spacing: 1px;
+  display: block;
+  margin-top: 2px;
+}
+
+/* ── Card ── */
+.card-sala {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  width: 100%;
+  max-width: 400px;
+}
+
+/* ── Labels + inputs ── */
+.label-sala {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 6px;
+}
+
+.input-sala {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 6px;
+  text-align: center;
+  text-transform: uppercase;
+  padding: 14px 10px;
+  outline: none;
+  transition: border-color .2s;
+  margin-bottom: 14px;
+}
+.input-sala:focus { border-color: var(--dorado); }
+
+.input-nombre {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: 'Barlow', sans-serif;
+  font-size: 18px;
+  padding: 14px 16px;
+  outline: none;
+  transition: border-color .2s;
+  margin-bottom: 14px;
+}
+.input-nombre:focus { border-color: var(--dorado); }
+
+/* ── Botones grandes táctiles ── */
+.btn-sala {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all .15s;
+  margin-bottom: 10px;
+  text-align: center;
+}
+.btn-sala:active { transform: scale(.97); }
+.btn-sala:last-child { margin-bottom: 0; }
+
+.btn-dorado  { background: var(--dorado);  color: #000; }
+.btn-verde   { background: var(--verde);   color: #000; }
+.btn-rojo    { background: var(--rojo);    color: #fff; }
+.btn-azul    { background: var(--azul);    color: #fff; }
+.btn-naranja { background: var(--naranja); color: #fff; }
+.btn-gris    { background: var(--bg3);     color: var(--text); border: 1px solid var(--border); }
+.btn-morado  { background: var(--morado);  color: #fff; }
+
+.btn-sala:disabled { opacity: .4; cursor: not-allowed; }
+
+/* ── Código de sala grande ── */
+.codigo-sala {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 64px;
+  font-weight: 900;
+  letter-spacing: 10px;
+  color: var(--dorado);
+  text-align: center;
+  margin: 8px 0;
+}
+
+/* ── Estado de conexión ── */
+.estado-conexion {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.estado-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+.estado-conexion.conectado .estado-dot { background: var(--verde); animation: pulse-dot 1.5s infinite; }
+.estado-conexion.conectando .estado-dot { background: var(--naranja); animation: pulse-dot .8s infinite; }
+.estado-conexion.error .estado-dot { background: var(--rojo); }
+@keyframes pulse-dot {
+  0%,100% { opacity:1; } 50% { opacity:.3; }
+}
+
+/* ── Pregunta en overlay participante ── */
+.pregunta-sala {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  text-align: center;
+  line-height: 1.3;
+  padding: 16px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: 16px;
+}
+
+/* ── Opciones de voto ── */
+.opciones-voto {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 400px;
+}
+.opcion-voto {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  background: var(--bg2);
+  transition: all .15s;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text);
+  width: 100%;
+  text-align: left;
+}
+.opcion-voto:active { transform: scale(.98); }
+.opcion-voto.seleccionada {
+  border-color: var(--dorado);
+  background: rgba(240,165,0,.12);
+  color: var(--dorado);
+}
+.opcion-voto.votada-ok { border-color: var(--verde); background: rgba(46,204,113,.12); }
+.opcion-voto.votada-no { border-color: var(--rojo);  background: rgba(231,76,60,.12); }
+.opcion-voto:disabled  { opacity: .5; cursor: not-allowed; }
+
+.opcion-letra {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+/* ── Lista de participantes en lobby ── */
+.lista-participantes {
+  width: 100%;
+  max-width: 400px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+.participante-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 15px;
+}
+.participante-item:last-child { border-bottom: none; }
+.participante-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--dorado);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  color: #000;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* ── Voto enviado ── */
+.voto-enviado {
+  text-align: center;
+  padding: 20px;
+}
+.voto-enviado .check { font-size: 48px; }
+.voto-enviado p { font-size: 14px; color: var(--dim); margin-top: 8px; }
+
+/* ── Mensaje de estado ── */
+.msg-sala {
+  text-align: center;
+  font-size: 14px;
+  color: var(--dim);
+  padding: 8px;
+  line-height: 1.5;
+}
+.msg-sala strong { color: var(--dorado); }
+
+/* ── Cámara preview ── */
+#local-video {
+  width: 100%;
+  max-width: 400px;
+  border-radius: 10px;
+  background: #000;
+  border: 1px solid var(--border);
+  aspect-ratio: 16/9;
+  object-fit: cover;
+  display: none;
+}
+
+/* ── Admin: control buttons en grid ── */
+.admin-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: 100%;
+  max-width: 400px;
+}
+.admin-grid .btn-sala { margin: 0; font-size: 15px; padding: 20px 10px; }
+.admin-grid .btn-sala .admin-icon { font-size: 24px; display: block; margin-bottom: 4px; }
+.admin-full { grid-column: 1 / -1; }
+
+/* ── Sala code badge (admin) ── */
+.sala-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(240,165,0,.12);
+  border: 1px solid var(--dorado);
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  color: var(--dorado);
+}
+.sala-badge span { font-size: 12px; font-weight: 400; color: var(--dim); letter-spacing: .5px; }
+
+/* ── Contador participantes ── */
+.contador-sala {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px;
+  color: var(--dim);
+  letter-spacing: .5px;
+}
+.contador-sala strong { color: var(--verde); font-size: 18px; }
+
+/* ── Toast ── */
+#toast-sala {
+  position: fixed;
+  bottom: 16px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  pointer-events: none;
+}
+.toast-sala-item {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  animation: toast-in .2s ease-out, toast-out .3s ease-in 2.5s forwards;
+  white-space: nowrap;
+}
+.toast-sala-item.ok    { background: var(--verde);  color: #000; }
+.toast-sala-item.error { background: var(--rojo);   color: #fff; }
+.toast-sala-item.info  { background: var(--dorado); color: #000; }
+@keyframes toast-in  { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+@keyframes toast-out { from { opacity:1; } to { opacity:0; } }
+
+/* ── Admin password screen ── */
+.pw-input {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 20px;
+  padding: 14px 16px;
+  outline: none;
+  text-align: center;
+  letter-spacing: 4px;
+  margin-bottom: 14px;
+}
+.pw-input:focus { border-color: var(--dorado); }

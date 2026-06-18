@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>KONKURSOX — Admin móvil</title>
+  <link rel="stylesheet" href="css/sala.css" />
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     PANTALLA 1: Login
+═══════════════════════════════════════════ -->
+<section id="screen-login" class="screen activa">
+  <div class="logo-sala">KONKURSOX<span>Panel de admin</span></div>
+
+  <div class="card-sala">
+    <label class="label-sala" for="inp-room-admin">Código de sala</label>
+    <input id="inp-room-admin" class="input-sala" type="text"
+           maxlength="4" placeholder="XXXX"
+           autocomplete="off" autocorrect="off" spellcheck="false" />
+
+    <label class="label-sala" for="inp-pw">Contraseña</label>
+    <input id="inp-pw" class="pw-input" type="password"
+           placeholder="••••••••••••"
+           autocomplete="current-password" />
+
+    <button class="btn-sala btn-dorado" onclick="loginAdmin()">Entrar</button>
+  </div>
+  <div id="login-error" class="msg-sala" style="color:var(--rojo)"></div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     PANTALLA 2: Control
+═══════════════════════════════════════════ -->
+<section id="screen-admin" class="screen">
+  <div class="logo-sala">KONKURSOX<span>Admin</span></div>
+
+  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center">
+    <div class="sala-badge"><span>Sala</span><span id="admin-codigo">----</span></div>
+    <div id="admin-conexion" class="estado-conexion conectando">
+      <div class="estado-dot"></div>
+      <span id="admin-conexion-texto">Conectando…</span>
+    </div>
+  </div>
+
+  <div class="contador-sala" id="admin-contador">
+    <strong>0</strong> participantes conectados
+  </div>
+
+  <!-- Lista participantes -->
+  <div class="lista-participantes" id="admin-lista" style="max-width:400px;width:100%"></div>
+
+  <!-- Controles principales -->
+  <div class="admin-grid">
+
+    <button class="btn-sala btn-dorado" onclick="adminCmd('tt_mostrar')">
+      <span class="admin-icon">▶</span>Mostrar TT
+    </button>
+    <button class="btn-sala btn-gris" onclick="adminCmd('tt_limpiar')">
+      <span class="admin-icon">✕</span>Limpiar TT
+    </button>
+
+    <button class="btn-sala btn-verde" onclick="adminCmd('tt_revelar')">
+      <span class="admin-icon">✔</span>Revelar TT
+    </button>
+    <button class="btn-sala btn-morado" onclick="adminToggleVoto()">
+      <span class="admin-icon" id="btn-voto-icon">🗳</span>
+      <span id="btn-voto-txt">Abrir votos</span>
+    </button>
+
+    <button class="btn-sala btn-dorado admin-full" onclick="adminCmd('sn_mostrar')">
+      <span class="admin-icon">▶</span>Mostrar Sí/No
+    </button>
+
+    <button class="btn-sala btn-verde" onclick="adminCmd('sn_revelar')">
+      <span class="admin-icon">✔</span>Revelar Sí/No
+    </button>
+    <button class="btn-sala btn-gris" onclick="adminCmd('sn_limpiar')">
+      <span class="admin-icon">✕</span>Limpiar Sí/No
+    </button>
+
+    <button class="btn-sala btn-naranja admin-full" onclick="adminCmd('pj_pista')">
+      <span class="admin-icon">💡</span>PJ: Dar pista
+    </button>
+    <button class="btn-sala btn-verde" onclick="adminCmd('pj_revelar')">
+      <span class="admin-icon">✔</span>PJ: Revelar
+    </button>
+    <button class="btn-sala btn-gris" onclick="adminCmd('pj_limpiar')">
+      <span class="admin-icon">✕</span>PJ: Limpiar
+    </button>
+
+    <button class="btn-sala btn-azul admin-full" onclick="adminCmd('timer_toggle')">
+      <span class="admin-icon">⏱</span>Timer: Iniciar/Pausar
+    </button>
+    <button class="btn-sala btn-gris" onclick="adminCmd('timer_reset')">
+      <span class="admin-icon">↺</span>Timer: Reset
+    </button>
+    <button class="btn-sala btn-gris" onclick="adminCmd('media_toggle')">
+      <span class="admin-icon">🖼</span>Media
+    </button>
+
+  </div>
+
+  <button class="btn-sala btn-rojo" style="max-width:400px;margin-top:8px" onclick="cerrarSesion()">
+    Salir de la sala
+  </button>
+</section>
+
+<!-- ── Toast ── -->
+<div id="toast-sala"></div>
+
+<!-- ── Scripts ── -->
+<script>window.CONFIG = { adminPassword: 'konkursox2025', ablyApiKey: 'yQeXgw.1Jo5mQ:2YF8c1KzGBLjzIxRma7D0MwPkMM5GhYOT3r6v7FPHQ8' };</script>
+<script src="config.js" onerror=""></script>
+<script src="https://cdn.ably.com/lib/ably.min-2.js"></script>
+<script src="js/online.js"></script>
+<script>
+'use strict';
+
+let adminRoom = '';
+let adminVotoActivo = false;
+const participantes = new Map();
+
+// ── Login ─────────────────────────────────────────────────────
+function loginAdmin() {
+  const room = (document.getElementById('inp-room-admin')?.value || '').trim().toUpperCase();
+  const pw   = (document.getElementById('inp-pw')?.value || '');
+  const errEl = document.getElementById('login-error');
+  const expected = window.CONFIG?.adminPassword || 'konkursox2025';
+
+  if (!room || room.length < 2) { errEl.textContent = 'Introduce el código de sala.'; return; }
+  if (pw !== expected) { errEl.textContent = 'Contraseña incorrecta.'; return; }
+  errEl.textContent = '';
+
+  const apiKey = (window.CONFIG?.ablyApiKey || '').trim();
+  if (!apiKey) { errEl.textContent = 'API Key de Ably no configurada (config.js).'; return; }
+
+  adminRoom = room;
+  document.getElementById('admin-codigo').textContent = adminRoom;
+  mostrarScreen('screen-admin');
+  iniciarAdmin(apiKey);
+}
+
+// ── OnlineLayer ───────────────────────────────────────────────
+function iniciarAdmin(apiKey) {
+  OnlineLayer.on('connected', () => {
+    setConexion('admin-conexion', 'conectado');
+    document.getElementById('admin-conexion-texto').textContent = 'Conectado';
+    toastAdmin('Conectado como admin', 'ok');
+  });
+
+  OnlineLayer.on('disconnected', () => {
+    setConexion('admin-conexion', 'conectando');
+    document.getElementById('admin-conexion-texto').textContent = 'Reconectando…';
+  });
+
+  OnlineLayer.on('participants_list', (msg) => {
+    participantes.clear();
+    (msg.payload || []).forEach(p => participantes.set(p.id, p));
+    renderLista();
+  });
+
+  OnlineLayer.on('participant_joined', (msg) => {
+    if (msg.payload) { participantes.set(msg.payload.id, msg.payload); renderLista(); }
+  });
+
+  OnlineLayer.on('participant_left', (msg) => {
+    if (msg.payload?.id) { participantes.delete(msg.payload.id); renderLista(); }
+  });
+
+  OnlineLayer.connect(adminRoom, 'admin', apiKey, 'Admin', false);
+}
+
+// ── Lista participantes ───────────────────────────────────────
+function renderLista() {
+  const el = document.getElementById('admin-lista');
+  const ctr = document.getElementById('admin-contador');
+  const salas = [...participantes.values()].filter(p => p.role === 'sala');
+  if (ctr) ctr.innerHTML = `<strong>${salas.length}</strong> participantes conectados`;
+  if (!el) return;
+  el.innerHTML = '';
+  salas.forEach(p => {
+    const div = document.createElement('div');
+    div.className = 'participante-item';
+    const av = document.createElement('div');
+    av.className = 'participante-avatar';
+    av.textContent = (p.name || '?')[0].toUpperCase();
+    const name = document.createElement('span');
+    name.textContent = p.name + (p.voted ? ' ✅' : '');
+    div.appendChild(av); div.appendChild(name);
+    el.appendChild(div);
+  });
+}
+
+// ── Comandos ──────────────────────────────────────────────────
+function adminCmd(cmd) {
+  OnlineLayer.publish({ type: 'admin_cmd', payload: { cmd } });
+  toastAdmin(cmd, 'info');
+}
+
+function adminToggleVoto() {
+  adminVotoActivo = !adminVotoActivo;
+  if (adminVotoActivo) {
+    OnlineLayer.publish({ type: 'start_voting', payload: { numOptions: 4 } });
+    document.getElementById('btn-voto-icon').textContent = '🛑';
+    document.getElementById('btn-voto-txt').textContent  = 'Cerrar votos';
+    toastAdmin('Votación abierta', 'ok');
+  } else {
+    OnlineLayer.publish({ type: 'stop_voting' });
+    document.getElementById('btn-voto-icon').textContent = '🗳';
+    document.getElementById('btn-voto-txt').textContent  = 'Abrir votos';
+    toastAdmin('Votación cerrada', 'info');
+  }
+}
+
+// ── Utilidades ────────────────────────────────────────────────
+function mostrarScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('activa'));
+  document.getElementById(id)?.classList.add('activa');
+}
+
+function setConexion(elId, estado) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  ['conectado','conectando','error'].forEach(e => el.classList.remove(e));
+  el.classList.add(estado);
+}
+
+function toastAdmin(msg, tipo = 'info') {
+  const c = document.getElementById('toast-sala');
+  if (!c) return;
+  const t = document.createElement('div');
+  t.className = `toast-sala-item ${tipo}`;
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 2800);
+}
+
+function cerrarSesion() {
+  OnlineLayer.disconnect();
+  mostrarScreen('screen-login');
+}
+
+// ── Enter en inputs ───────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('inp-pw')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') loginAdmin();
+  });
+  document.getElementById('inp-room-admin')?.addEventListener('input', e => {
+    e.target.value = e.target.value.toUpperCase();
+  });
+});
+</script>
+</body>
+</html>
