@@ -1,0 +1,110 @@
+[
+  {
+    "id": 1,
+    "pregunta": "¿Cuál de estos nombres NUNCA ha sido el nombre oficial del grupo de WhatsApp?",
+    "opciones": ["ETA (Rocket League)", "POYA", "Guerrilleros de Cristo Rey", "Tu Puta Madre"],
+    "correcta": 3
+  },
+  {
+    "id": 2,
+    "pregunta": "¿Qué falsa carta le redactaron a Nacho en el grupo para que se la enviara a su familia?",
+    "opciones": ["Una confesando que le habían hechado de la carrera", "Una confesando que se había unido a ETA como organización social", "Una carta declarando su amor por Luis", "Una anunciando que no creía en Dios"],
+    "correcta": 1
+  },
+  {
+    "id": 3,
+    "pregunta": "¿De qué examen fue supuestamente expulsado Nico Codema por decir 'para pitón la que tengo aquí'?",
+    "opciones": ["Álgebra", "Empresa", "Python", "TIC"],
+    "correcta": 2
+  },
+  {
+    "id": 4,
+    "pregunta": "¿Qué famosa 'EMERGENCIA' dijo Mateo que había ocurrido en su salón?",
+    "opciones": ["Se fue la luz en pleno partido", "Se metió un murciélago", "Su padre estaba acechando", "Había una 'paja de barro' volando por la sala"],
+    "correcta": 3
+  },
+  {
+    "id": 5,
+    "pregunta": "¿Qué poética frase le acabó dedicando Marcos a Nico tras una mala pasada del autocorrector?",
+    "opciones": ["Moro de mi amor", "Negro de mi corazón", "Mierda de mi vida", "Moro de mis ojos"],
+    "correcta": 0
+  },
+  {
+    "id": 6,
+    "pregunta": "¿Cómo contestaba Nico Codema al mítico mensaje de 'Jueves por la tarde lo que quieras guapo'?",
+    "opciones": ["...Sábado de fiesta y lo que surja", "...Lunes por la mañana a estudiar", "...Viernes por la tarde y lo que quiera yo negro", "...Domingo de misa contigo"],
+    "correcta": 2
+  },
+  {
+    "id": 7,
+    "pregunta": "¿Qué excusa médica falsa añadían a menudo entre paréntesis en el grupo para justificar por qué podían jugar a la consola?",
+    "opciones": ["(tengo fiebre amarilla)", "(tengo disfunción eréctil)", "(tengo fimosis)", "(tengo esquizofrenia)"],
+    "correcta": 1
+  },
+  {
+    "id": 8,
+    "pregunta": "¿A qué miembro del grupo expulsan en un momento dado celebrándolo con memes de asco que decían 'Yo cuando huelo a...'?",
+    "opciones": ["Luis", "Nacho", "Arias", "Jandroye"],
+    "correcta": 0
+  },
+  {
+    "id": 9,
+    "pregunta": "Según el resumen anual de PlayStation, ¿cuántas horas acumuló Pelayo Casas jugando al Elden Ring?",
+    "opciones": ["150 horas", "200 horas", "500 horas", "800 horas"],
+    "correcta": 2
+  },
+  {
+    "id": 10,
+    "pregunta": "¿La llegada de qué personaje al Rocket League provocó que el grupo enloqueciera de la emoción?",
+    "opciones": ["Batman", "Dominic Toretto", "Rayo McQueen", "Francesco Virgolini"],
+    "correcta": 2
+  },
+  {
+    "id": 11,
+    "pregunta": "¿Por qué motivo le cayó a Marcos JH un baneo de 30 días en el chat del juego?",
+    "opciones": ["Por usar hacks de auto-apuntado", "Por escribir 'kys fucking niggers'", "Por abandonar un torneo competitivo", "Por escribir 'kys' 'kys' 'kys'"],
+    "correcta": 1
+  },
+  {
+    "id": 12,
+    "pregunta": "¿A qué comunidad autónoma amenazó/bromeó Mateo que se iba a ir a estudiar antes de confirmar que se quedaba en Asturias?",
+    "opciones": ["Comunidad de Madrid", "Cataluña", "País Vasco", "Melilla"],
+    "correcta": 2
+  },
+  {
+    "id": 13,
+    "pregunta": "Cuando estaban planeando cómo espiar la 'emergencia' en el salón de Mateo, ¿de qué dijo Pablo Rodríguez que iba a ir disfrazado?",
+    "opciones": ["De ninja", "De palito de pescado", "De repartidor de Glovo", "De Papá Noel"],
+    "correcta": 1
+  },
+  {
+    "id": 14,
+    "pregunta": "Según confesó Luis Chups, ¿en qué juego le metieron un baneo de un mes entero 'por insultar a los guiris'?",
+    "opciones": ["Rocket League", "FIFA", "Minecraft", "Rainbow Six"],
+    "correcta": 2
+  },
+  {
+    "id": 15,
+    "pregunta": "¿Qué excusa tierna (y que causó indignación) puso Nico Codema a Pablo Rodríguez para dejar de jugar al Fortnite?",
+    "opciones": ["'Llegó mi abuelita'", "'Tengo que pasear al perro'", "'Se me queman las lentejas'", "'Llegó mi prima la china'"],
+    "correcta": 0
+  },
+  {
+    "id": 18,
+    "pregunta": "Una noche, Marcos no podía meterse al Fortnite porque no tenía la televisión disponible. ¿Qué programa confesó que estaban viendo en su casa?",
+    "opciones": ["El Chiringuito de Jugones", "Tu cara me suena", "Masterchef", "La Isla de las Tentaciones"],
+    "correcta": 1
+  },
+  {
+    "id": 19,
+    "pregunta": "Mateo propuso crear un servidor para Semana Santa de un juego que corría hasta 'en una tostadora'. ¿De qué juego hablaba?",
+    "opciones": ["Rust", "Minecraft", "Project Zomboid", "Terraria"],
+    "correcta": 2
+  },
+  {
+    "id": 20,
+    "pregunta": "¿A qué evento musical dentro de Fortnite se refirió Marcos como el 'slimshadyeminemchowsuperrapconcertfornait'?",
+    "opciones": ["El concierto de Travis Scott", "El concierto de Eminem", "El concierto de The Weeknd", "El concierto de Rosalía"],
+    "correcta": 1
+  }
+]

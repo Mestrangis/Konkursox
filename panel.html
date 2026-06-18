@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KONKURSOX — Panel de Control v2</title>
+  <link rel="stylesheet" href="css/panel.css">
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ── TOPBAR ── -->
+  <div id="topbar">
+    <div class="logo">KONKURSOX <span>v2</span></div>
+    <div id="gm-player">
+      <!-- Punto de color de la pista -->
+      <div id="gm-color-dot" class="gm-color-dot"></div>
+
+      <!-- Cargar desde disco -->
+      <label class="btn btn-gris btn-sm" title="Cargar archivo de audio" style="cursor:pointer;flex-shrink:0">
+        📂<input type="file" accept="audio/*" style="display:none" onchange="gmCargarArchivo(event)">
+      </label>
+
+      <!-- Info pista -->
+      <div class="gm-pista-info"><span id="gm-nombre-pista">Sin pista</span></div>
+
+      <!-- Controles -->
+      <div class="gm-controles">
+        <button class="btn btn-gris btn-sm" id="gm-btn-play" onclick="gmTogglePlay()">▶</button>
+        <button class="btn btn-gris btn-sm" onclick="gmStop()">■</button>
+        <button class="btn btn-dorado btn-sm" id="gm-btn-repetir" onclick="gmToggleRepetir()" title="Repetir ON">🔁</button>
+      </div>
+
+      <!-- Progreso + tiempos -->
+      <div class="gm-progreso-wrap">
+        <span id="gm-tiempo-actual" class="gm-tiempo">0:00</span>
+        <input type="range" id="gm-progreso" min="0" max="100" value="0" class="gm-slider">
+        <span id="gm-tiempo-total" class="gm-tiempo">0:00</span>
+      </div>
+
+      <!-- Volumen -->
+      <div class="gm-vol-wrap">
+        <span style="font-size:12px">🔊</span>
+        <input type="range" id="gm-vol" min="0" max="100" value="60" class="gm-slider" style="width:65px">
+        <span id="gm-vol-lbl" class="gm-tiempo">60%</span>
+      </div>
+
+      <!-- Lista rápida de canciones (desplegable) -->
+      <div class="gm-lista-wrap">
+        <button class="btn btn-gris btn-sm gm-lista-toggle" onclick="gmToggleLista()" title="Lista de canciones">🎶</button>
+        <div id="gm-lista-rapida-panel" class="gm-lista-rapida-panel" style="display:none">
+          <div id="gm-lista-rapida"></div>
+        </div>
+      </div>
+
+      <audio id="gm-audio" loop></audio>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+      <div class="estado-live"><div class="dot"></div> EN VIVO</div>
+      <button id="btn-abrir-overlay" onclick="abrirOverlay()">🖥️ Overlay</button>
+    </div>
+  </div>
+
+  <!-- ── TABS NAV ── -->
+  <nav id="tabs-nav">
+    <button class="tab-btn activa" data-tab="camaras" onclick="cambiarTab('camaras')">
+      <span class="tab-icon">📷</span> Cámaras
+    </button>
+    <div class="tab-separador"></div>
+    <button class="tab-btn" data-tab="tipo-test" onclick="cambiarTab('tipo-test')">
+      <span class="tab-icon">🔤</span> Tipo Test
+    </button>
+    <button class="tab-btn" data-tab="si-no" onclick="cambiarTab('si-no')">
+      <span class="tab-icon">✅</span> Sí / No
+    </button>
+    <button class="tab-btn" data-tab="precio-justo" onclick="cambiarTab('precio-justo')">
+      <span class="tab-icon">💰</span> Precio Justo
+    </button>
+    <button class="tab-btn" data-tab="rosco" onclick="cambiarTab('rosco')">
+      <span class="tab-icon">🌸</span> El Rosco
+    </button>
+    <div class="tab-separador"></div>
+    <button class="tab-btn" data-tab="biblioteca" onclick="cambiarTab('biblioteca')">
+      <span class="tab-icon">📁</span> Biblioteca
+    </button>
+    <button class="tab-btn" data-tab="personalizacion" onclick="cambiarTab('personalizacion')">
+      <span class="tab-icon">🎨</span> Personalización
+    </button>
+  </nav>
+
+  <!-- ── CONTENIDO TABS ── -->
+  <div id="contenido-tabs">
+
+    <!-- ════════════════════════════════════════════════
+         PESTAÑA: CÁMARAS
+    ════════════════════════════════════════════════ -->
+    <div id="tab-camaras" class="tab-panel activa">
+      <div class="camaras-layout">
+
+        <!-- ── COLUMNA IZQUIERDA: slots ── -->
+        <div class="camaras-col">
+
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">📐</span> Disposición en Overlay</div>
+            <div id="cam-layout-picker"></div>
+            <div id="cam-layout-desc"></div>
+            <p style="font-size:11px; color:var(--text-muted); margin-top:4px; line-height:1.5">
+              Los slots resaltados en dorado son los que usa la disposición activa.<br>
+              Puedes activar slots extra para tenerlos listos y enviarlos cuando quieras.
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">📷</span> Cámaras</div>
+            <div id="cam-slots-container"></div>
+          </div>
+
+        </div><!-- /col-izquierda -->
+
+        <!-- ── COLUMNA DERECHA: acciones ── -->
+        <div class="camaras-col">
+
+          <div class="card">
+            <button class="btn-enviar-overlay" onclick="camEnviarAlOverlay()">
+              📤 ENVIAR CÁMARAS AL OVERLAY
+            </button>
+          </div>
+
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">🔄</span> Dispositivos</div>
+            <button class="btn btn-gris btn-full" onclick="detectarCamaras()">
+              🔍 Detectar / Refrescar Cámaras
+            </button>
+            <p style="font-size:11px; color:var(--text-muted); margin-top:8px; line-height:1.6">
+              💡 Para usar <strong style="color:var(--dorado)">OBS Virtual Camera</strong>:<br>
+              Herramientas → Cámara Virtual → Iniciar,<br>
+              luego pulsa "Detectar".
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">ℹ️</span> Notas de uso</div>
+            <p style="font-size:12px; color:var(--text-dim); line-height:1.7">
+              • El overlay abre las cámaras por su propio <em>deviceId</em>; necesita el mismo navegador y permisos.<br>
+              • <strong style="color:var(--dorado)">Ocultar</strong> una cámara la mantiene abierta pero la hace invisible en el overlay.<br>
+              • Desactivar un slot libera la cámara completamente.<br>
+              • Ajusta márgenes y tamaños finos directamente en OBS con transformaciones de fuente.
+            </p>
+          </div>
+
+        </div><!-- /col-derecha -->
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════
+         PESTAÑA: TIPO TEST
+    ════════════════════════════════════════════════ -->
+    <div id="tab-tipo-test" class="tab-panel">
+      <div class="tt-layout">
+
+        <!-- ── COLUMNA IZQUIERDA ── -->
+        <div class="tt-col">
+
+          <!-- Pregunta actual -->
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">📝</span> Pregunta Actual</div>
+
+            <label>Texto de la pregunta</label>
+            <textarea id="tt-input-pregunta" rows="2" placeholder="Escribe la pregunta aquí..."></textarea>
+
+            <label>Opciones</label>
+            <div id="tt-opciones-editor" class="opciones-editor"></div>
+
+            <div class="fila-btn" style="margin-top:10px">
+              <button class="btn btn-dorado" onclick="ttMostrarPregunta()">▶ Mostrar en Overlay</button>
+              <button class="btn btn-verde"  onclick="ttRevelarRespuesta()">✔ Revelar Respuesta</button>
+              <button class="btn btn-rojo"   onclick="ttLimpiarPregunta()">✕ Limpiar</button>
+              <button class="btn btn-gris"   onclick="ttGuardarEnBanco()">💾 Guardar</button>
+            </div>
+          </div>
+
+          <!-- Temporizador -->
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">⏱</span> Temporizador</div>
+            <div class="timer-display" id="tt-display-tiempo">30</div>
+            <div class="timer-barra">
+              <div class="timer-progreso" id="tt-barra-tiempo" style="width:100%"></div>
+            </div>
+            <div class="timer-config">
+              <label>Seg.</label>
+              <input type="number" id="tt-input-tiempo" value="30" min="5" max="300">
+              <button class="btn btn-gris btn-sm" onclick="ttResetTimer()">↺ Reset</button>
+            </div>
+            <div class="fila-btn">
+              <button class="btn btn-verde btn-sm" id="tt-btn-iniciar" onclick="ttIniciarTimer()">▶ Iniciar</button>
+              <button class="btn btn-naranja btn-sm" onclick="ttPausarTimer()">⏸ Pausa</button>
+              <button class="btn btn-rojo btn-sm"    onclick="ttDetenerTimer()">■ Detener</button>
+            </div>
+            <div style="border-top:1px solid var(--border); padding-top:8px; margin-top:4px;">
+              <button class="btn btn-gris btn-sm" id="tt-btn-timer-overlay" onclick="ttToggleTimerOverlay()" style="width:100%">⏱ Mostrar Timer en Overlay</button>
+            </div>
+          </div>
+
+          <!-- Multimedia -->
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">📺</span> Multimedia (Overlay)</div>
+
+            <label>Selección rápida (Biblioteca)</label>
+            <div id="tt-biblioteca-grid" class="biblioteca-grid"></div>
+
+            <label style="margin-top:8px">URL, ruta local o archivo</label>
+            <div class="media-input-row">
+              <input type="text" id="tt-input-multimedia" placeholder="https://... o ruta/al/archivo.mp4" style="margin:0;flex:1">
+              <button class="btn btn-gris btn-sm" onclick="ttMedia.seleccionarArchivo()" title="Explorador">📂</button>
+            </div>
+            <input type="file" id="tt-file-multimedia" accept="image/*,video/*" style="display:none">
+            <input type="hidden" id="tt-tipo-media-auto" value="">
+
+            <div class="fila-btn" style="margin-top:6px">
+              <button class="btn btn-gris btn-sm" onclick="ttMedia.lanzar('imagen')">🖼️ Imagen</button>
+              <button class="btn btn-rojo btn-sm"  onclick="ttMedia.lanzar('youtube')">▶ YouTube</button>
+              <button class="btn btn-azul btn-sm"  onclick="ttMedia.lanzar('video')">🎬 Vídeo</button>
+              <button class="btn btn-gris btn-sm"  onclick="ttMedia.cerrar()">✕ Cerrar</button>
+            </div>
+
+            <!-- Controles de vídeo con barra de progreso -->
+            <div id="tt-video-controles" style="display:none">
+              <div class="video-progress-row">
+                <span id="tt-video-tiempo" class="video-tiempo">0:00 / --:--</span>
+              </div>
+              <input type="range" id="tt-progreso-video" min="0" max="100" value="0" style="margin-bottom:5px">
+              <div class="fila-btn">
+                <button class="btn btn-verde btn-sm"   onclick="ttMedia.videoPlay()">▶ Play</button>
+                <button class="btn btn-naranja btn-sm" onclick="ttMedia.videoPause()">⏸ Pausa</button>
+                <button class="btn btn-gris btn-sm"    onclick="ttMedia.videoReset()">⏮ Reiniciar</button>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /col-izquierda -->
+
+        <!-- ── COLUMNA DERECHA ── -->
+        <div class="tt-col">
+
+          <!-- Activar modo en overlay -->
+          <div class="card">
+            <button class="btn-enviar-overlay" onclick="ttActivarModoEnOverlay()">
+              📤 ACTIVAR TIPO TEST EN OVERLAY
+            </button>
+          </div>
+
+          <!-- Escalera mini -->
+          <div class="card">
+            <div class="esc-mini-slot"></div>
+          </div>
+
+          <!-- Comodines -->
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">🃏</span> Comodines</div>
+            <div class="com-mini-slot" data-modo="tipo-test"></div>
+          </div>
+
+          <!-- Banco de preguntas -->
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">📚</span> Banco de Preguntas</div>
+            <div id="tt-banco-lista" class="banco-lista">
+              <div class="banco-vacio">No hay preguntas guardadas todavía.</div>
+            </div>
+            <div class="fila-btn" style="margin-top:8px">
+              <button class="btn btn-gris btn-sm" onclick="ttExportarBanco()">📤 Exportar JSON</button>
+              <label class="btn btn-gris btn-sm" style="cursor:pointer">
+                📥 Importar JSON
+                <input type="file" accept=".json" onchange="ttImportarBanco(event)" style="display:none">
+              </label>
+            </div>
+          </div>
+
+          <!-- Reproductor de música -->
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">🎵</span> Música</div>
+            <label class="btn btn-gris btn-sm btn-full" style="cursor:pointer;margin-bottom:6px">
+              📂 Cargar pista de audio
+              <input type="file" id="tt-input-musica" accept="audio/*" style="display:none">
+            </label>
+            <div class="musica-info">🎵 <span id="tt-nombre-pista">Ninguna</span></div>
+            <audio id="tt-audio"></audio>
+            <div class="fila-btn">
+              <button class="btn btn-verde btn-sm"   onclick="ttPlayMusica()">▶ Play</button>
+              <button class="btn btn-naranja btn-sm" onclick="ttPausaMusica()">⏸ Pausa</button>
+              <button class="btn btn-rojo btn-sm"    onclick="ttStopMusica()">■ Stop</button>
+            </div>
+            <input type="range" id="tt-progreso-musica" min="0" max="100" value="0" style="margin-bottom:6px">
+            <div class="vol-row">
+              <label>Volumen</label>
+              <input type="range" id="tt-vol-musica" min="0" max="100" value="60"
+                oninput="ttVolumenMusica(this.value)" style="flex:1">
+              <span class="vol-label" id="tt-vol-musica-lbl">60%</span>
+            </div>
+          </div>
+
+          <!-- SFX compartido -->
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">🔊</span> Efectos de Sonido</div>
+            <div id="tt-sfx-lista" class="sfx-lista"></div>
+            <div class="vol-row" style="margin-top:8px">
+              <label>Volumen</label>
+              <input type="range" id="tt-vol-sfx" min="0" max="100" value="70" style="flex:1">
+              <span class="vol-label" id="tt-vol-sfx-lbl">70%</span>
+            </div>
+          </div>
+
+        </div><!-- /col-derecha -->
+      </div><!-- /tt-layout -->
+    </div><!-- /tab-tipo-test -->
+
+    <!-- ════════════════════════════════════════════════
+         PESTAÑA: SÍ / NO
+    ════════════════════════════════════════════════ -->
+    <div id="tab-si-no" class="tab-panel">
+      <div class="tt-layout">
+
+        <!-- ── COLUMNA IZQUIERDA ── -->
+        <div class="tt-col">
+
+          <!-- Pregunta + opciones -->
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">✅</span> Pregunta</div>
+            <label>Texto de la pregunta</label>
+            <textarea id="sn-input-pregunta" rows="2" placeholder="Escribe la pregunta aquí..."></textarea>
+
+            <label>Opciones (edita el texto)</label>
+            <div class="sn-opciones-editor">
+              <div class="sn-opcion-row" id="sn-fila-0">
+                <div class="sn-opcion-color" style="background:#2ecc71"></div>
+                <input type="text" id="sn-opcion-0" value="SÍ" style="flex:1;margin:0">
+                <button class="btn btn-verde btn-sm"  title="Es la respuesta correcta"   onclick="snMarcarCorrecta(0)">✔</button>
+                <button class="btn btn-dorado btn-sm" title="Resaltar (la elige el concursante)" onclick="snResaltar(0)">►</button>
+              </div>
+              <div class="sn-opcion-row" id="sn-fila-1">
+                <div class="sn-opcion-color" style="background:#e74c3c"></div>
+                <input type="text" id="sn-opcion-1" value="NO" style="flex:1;margin:0">
+                <button class="btn btn-verde btn-sm"  title="Es la respuesta correcta"   onclick="snMarcarCorrecta(1)">✔</button>
+                <button class="btn btn-dorado btn-sm" title="Resaltar (la elige el concursante)" onclick="snResaltar(1)">►</button>
+              </div>
+            </div>
+
+            <div class="fila-btn" style="margin-top:10px">
+              <button class="btn btn-dorado" onclick="snMostrarPregunta()">▶ Mostrar en Overlay</button>
+              <button class="btn btn-verde"  onclick="snRevelar()">✔ Revelar</button>
+              <button class="btn btn-rojo"   onclick="snLimpiar()">✕ Limpiar</button>
+              <button class="btn btn-gris"   onclick="snGuardar()">💾 Guardar</button>
+            </div>
+          </div>
+
+          <!-- Temporizador -->
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">⏱</span> Temporizador</div>
+            <div class="timer-display" id="sn-display-tiempo">30</div>
+            <div class="timer-barra"><div class="timer-progreso" id="sn-barra-tiempo" style="width:100%"></div></div>
+            <div class="timer-config">
+              <label>Seg.</label>
+              <input type="number" id="sn-input-tiempo" value="30" min="5" max="300">
+              <button class="btn btn-gris btn-sm" onclick="snTimer.reset()">↺ Reset</button>
+            </div>
+            <div class="fila-btn">
+              <button class="btn btn-verde btn-sm" id="sn-btn-iniciar" onclick="snTimer.iniciar()">▶ Iniciar</button>
+              <button class="btn btn-naranja btn-sm" onclick="snTimer.pausar()">⏸ Pausa</button>
+              <button class="btn btn-rojo btn-sm"    onclick="snTimer.detener()">■ Detener</button>
+            </div>
+            <div style="border-top:1px solid var(--border);padding-top:8px;margin-top:4px">
+              <button class="btn btn-gris btn-sm" id="sn-btn-timer-overlay" onclick="snTimer.toggleVisible()" style="width:100%">⏱ Mostrar Timer en Overlay</button>
+            </div>
+          </div>
+
+          <!-- Multimedia -->
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">📺</span> Multimedia (Overlay)</div>
+
+            <label>Selección rápida (Biblioteca)</label>
+            <div id="sn-biblioteca-grid" class="biblioteca-grid"></div>
+
+            <label style="margin-top:8px">URL, ruta local o archivo</label>
+            <div class="media-input-row">
+              <input type="text" id="sn-input-multimedia" placeholder="https://... o ruta/al/archivo.mp4" style="margin:0;flex:1">
+              <button class="btn btn-gris btn-sm" onclick="snMedia.seleccionarArchivo()" title="Explorador">📂</button>
+            </div>
+            <input type="file" id="sn-file-multimedia" accept="image/*,video/*" style="display:none">
+            <input type="hidden" id="sn-tipo-media-auto" value="">
+
+            <div class="fila-btn" style="margin-top:6px">
+              <button class="btn btn-gris btn-sm" onclick="snMedia.lanzar('imagen')">🖼️ Imagen</button>
+              <button class="btn btn-rojo btn-sm"  onclick="snMedia.lanzar('youtube')">▶ YouTube</button>
+              <button class="btn btn-azul btn-sm"  onclick="snMedia.lanzar('video')">🎬 Vídeo</button>
+              <button class="btn btn-gris btn-sm"  onclick="snMedia.cerrar()">✕ Cerrar</button>
+            </div>
+            <div id="sn-video-controles" style="display:none">
+              <div class="video-progress-row">
+                <span id="sn-video-tiempo" class="video-tiempo">0:00 / --:--</span>
+              </div>
+              <input type="range" id="sn-progreso-video" min="0" max="100" value="0" style="margin-bottom:5px">
+              <div class="fila-btn">
+                <button class="btn btn-verde btn-sm"   onclick="snMedia.videoPlay()">▶ Play</button>
+                <button class="btn btn-naranja btn-sm" onclick="snMedia.videoPause()">⏸ Pausa</button>
+                <button class="btn btn-gris btn-sm"    onclick="snMedia.videoReset()">⏮ Reiniciar</button>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /col-izquierda -->
+
+        <!-- ── COLUMNA DERECHA ── -->
+        <div class="tt-col">
+
+          <div class="card">
+            <button class="btn-enviar-overlay" onclick="snActivarModo()">
+              📤 ACTIVAR SÍ/NO EN OVERLAY
+            </button>
+          </div>
+
+          <!-- Escalera mini -->
+          <div class="card">
+            <div class="esc-mini-slot"></div>
+          </div>
+
+          <!-- Comodines -->
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">🃏</span> Comodines</div>
+            <div class="com-mini-slot" data-modo="si-no"></div>
+          </div>
+
+          <!-- Banco -->
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">📚</span> Banco de Preguntas</div>
+            <div id="sn-banco-lista" class="banco-lista">
+              <div class="banco-vacio">No hay preguntas guardadas todavía.</div>
+            </div>
+            <div class="fila-btn" style="margin-top:8px">
+              <button class="btn btn-gris btn-sm" onclick="snExportarBanco()">📤 Exportar JSON</button>
+              <label class="btn btn-gris btn-sm" style="cursor:pointer">
+                📥 Importar JSON
+                <input type="file" accept=".json" onchange="snImportarBanco(event)" style="display:none">
+              </label>
+            </div>
+          </div>
+
+          <!-- Música -->
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">🎵</span> Música</div>
+            <label class="btn btn-gris btn-sm btn-full" style="cursor:pointer;margin-bottom:6px">
+              📂 Cargar pista de audio
+              <input type="file" id="sn-input-musica" accept="audio/*" style="display:none">
+            </label>
+            <div class="musica-info">🎵 <span id="sn-nombre-pista">Ninguna</span></div>
+            <audio id="sn-audio"></audio>
+            <div class="fila-btn">
+              <button class="btn btn-verde btn-sm"   onclick="snPlayMusica()">▶ Play</button>
+              <button class="btn btn-naranja btn-sm" onclick="snPausaMusica()">⏸ Pausa</button>
+              <button class="btn btn-rojo btn-sm"    onclick="snStopMusica()">■ Stop</button>
+            </div>
+            <input type="range" id="sn-progreso-musica" min="0" max="100" value="0" style="margin-bottom:6px">
+            <div class="vol-row">
+              <label>Volumen</label>
+              <input type="range" id="sn-vol-musica" min="0" max="100" value="60"
+                oninput="snVolMusica(this.value)" style="flex:1">
+              <span class="vol-label" id="sn-vol-musica-lbl">60%</span>
+            </div>
+          </div>
+
+          <!-- SFX compartido -->
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">🔊</span> Efectos de Sonido</div>
+            <div id="sn-sfx-lista" class="sfx-lista"></div>
+            <div class="vol-row" style="margin-top:8px">
+              <label>Volumen</label>
+              <input type="range" id="sn-vol-sfx" min="0" max="100" value="70" style="flex:1">
+              <span class="vol-label" id="sn-vol-sfx-lbl">70%</span>
+            </div>
+          </div>
+
+        </div><!-- /col-derecha -->
+      </div>
+    </div><!-- /tab-si-no -->
+
+    <!-- ════════════════════════════════════════════════
+         PESTAÑA: PRECIO JUSTO
+    ════════════════════════════════════════════════ -->
+    <div id="tab-precio-justo" class="tab-panel">
+      <div class="tt-layout">
+
+        <!-- ── COLUMNA IZQUIERDA ── -->
+        <div class="tt-col">
+
+          <!-- Objeto a adivinar -->
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">💰</span> Objeto / Pregunta</div>
+            <label>Texto descriptivo (opcional)</label>
+            <textarea id="pj-input-texto" rows="2" placeholder="Ej: ¿Cuánto cuesta este TV 55 pulgadas?"></textarea>
+
+            <label>Imagen (URL o archivo local)</label>
+            <div class="media-input-row">
+              <input type="text" id="pj-input-imagen" placeholder="https://... o ruta/imagen.jpg" style="margin:0;flex:1">
+              <button class="btn btn-gris btn-sm" onclick="pjSeleccionarImagen()" title="Explorador">📂</button>
+            </div>
+            <input type="file" id="pj-file-imagen" accept="image/*" style="display:none">
+          </div>
+
+          <!-- Valor -->
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">🔢</span> Valor Propuesto</div>
+            <label>Valor que dice el concursante</label>
+            <div class="pj-valor-row">
+              <input type="text" id="pj-input-valor" placeholder="Ej: 350 o 24,99€" style="flex:1;margin:0;font-size:20px;font-weight:700;text-align:center">
+              <button class="btn btn-dorado" onclick="pjActualizarValor()" title="Actualizar en overlay">↻</button>
+            </div>
+
+            <div class="fila-btn" style="margin-top:10px">
+              <button class="btn btn-dorado btn-lg btn-full" onclick="pjMostrar()">▶ Mostrar en Overlay</button>
+            </div>
+
+            <div style="border-top:1px solid var(--border);margin-top:10px;padding-top:10px">
+              <label>Pistas de dirección</label>
+              <div class="pj-pistas-row">
+                <button class="btn btn-azul" onclick="pjPista('mas')" style="flex:1;font-size:18px">↑ MÁS</button>
+                <button class="btn btn-naranja" onclick="pjPista('menos')" style="flex:1;font-size:18px">↓ MENOS</button>
+              </div>
+            </div>
+
+            <div style="border-top:1px solid var(--border);margin-top:10px;padding-top:10px">
+              <label>Resolver ronda</label>
+              <div class="media-input-row" style="margin-bottom:8px">
+                <input type="text" id="pj-input-valor-real" placeholder="Valor real exacto (opcional)" style="margin:0;flex:1">
+              </div>
+              <div class="pj-pistas-row">
+                <button class="btn btn-verde" onclick="pjResolver(true)"  style="flex:1">✔ CORRECTO</button>
+                <button class="btn btn-rojo"  onclick="pjResolver(false)" style="flex:1">✗ INCORRECTO</button>
+              </div>
+              <button class="btn btn-gris btn-full" style="margin-top:6px" onclick="pjLimpiar()">✕ Limpiar Overlay</button>
+            </div>
+          </div>
+
+          <!-- Timer -->
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">⏱</span> Temporizador</div>
+            <div class="timer-display" id="pj-display-tiempo">30</div>
+            <div class="timer-barra"><div class="timer-progreso" id="pj-barra-tiempo" style="width:100%"></div></div>
+            <div class="timer-config">
+              <label>Seg.</label>
+              <input type="number" id="pj-input-tiempo" value="30" min="5" max="300">
+              <button class="btn btn-gris btn-sm" onclick="pjTimer.reset()">↺ Reset</button>
+            </div>
+            <div class="fila-btn">
+              <button class="btn btn-verde btn-sm" id="pj-btn-iniciar" onclick="pjTimer.iniciar()">▶ Iniciar</button>
+              <button class="btn btn-naranja btn-sm" onclick="pjTimer.pausar()">⏸ Pausa</button>
+              <button class="btn btn-rojo btn-sm"    onclick="pjTimer.detener()">■ Detener</button>
+            </div>
+            <div style="border-top:1px solid var(--border);padding-top:8px;margin-top:4px">
+              <button class="btn btn-gris btn-sm" id="pj-btn-timer-overlay" onclick="pjTimer.toggleVisible()" style="width:100%">⏱ Mostrar Timer en Overlay</button>
+            </div>
+          </div>
+
+        </div><!-- /col-izq -->
+
+        <!-- ── COLUMNA DERECHA ── -->
+        <div class="tt-col">
+
+          <div class="card">
+            <button class="btn-enviar-overlay" onclick="pjActivarModo()">
+              📤 ACTIVAR PRECIO JUSTO EN OVERLAY
+            </button>
+          </div>
+
+          <!-- Escalera mini -->
+          <div class="card">
+            <div class="esc-mini-slot"></div>
+          </div>
+
+          <!-- Comodines -->
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">🃏</span> Comodines</div>
+            <div class="com-mini-slot" data-modo="precio-justo"></div>
+          </div>
+
+          <!-- Banco -->
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">📚</span> Banco de Items</div>
+            <div id="pj-banco-lista" class="banco-lista"></div>
+            <div class="fila-btn" style="margin-top:8px">
+              <button class="btn btn-gris btn-sm" onclick="pjGuardar()">💾 Guardar item</button>
+              <button class="btn btn-gris btn-sm" onclick="pjExportarBanco()">📤 Exportar</button>
+              <label class="btn btn-gris btn-sm" style="cursor:pointer">📥 Importar<input type="file" accept=".json" onchange="pjImportarBanco(event)" style="display:none"></label>
+            </div>
+          </div>
+
+          <!-- Multimedia -->
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">📺</span> Multimedia (Overlay)</div>
+            <label>Selección rápida (Biblioteca)</label>
+            <div id="pj-biblioteca-grid" class="biblioteca-grid"></div>
+            <label style="margin-top:8px">URL, ruta local o archivo</label>
+            <div class="media-input-row">
+              <input type="text" id="pj-input-multimedia" placeholder="https://..." style="margin:0;flex:1">
+              <button class="btn btn-gris btn-sm" onclick="pjMedia.seleccionarArchivo()" title="Explorador">📂</button>
+            </div>
+            <input type="file" id="pj-file-multimedia" accept="image/*,video/*" style="display:none">
+            <input type="hidden" id="pj-tipo-media-auto" value="">
+            <div class="fila-btn" style="margin-top:6px">
+              <button class="btn btn-gris btn-sm" onclick="pjMedia.lanzar('imagen')">🖼️ Imagen</button>
+              <button class="btn btn-rojo btn-sm"  onclick="pjMedia.lanzar('youtube')">▶ YouTube</button>
+              <button class="btn btn-azul btn-sm"  onclick="pjMedia.lanzar('video')">🎬 Vídeo</button>
+              <button class="btn btn-gris btn-sm"  onclick="pjMedia.cerrar()">✕ Cerrar</button>
+            </div>
+            <div id="pj-video-controles" style="display:none">
+              <div class="video-progress-row"><span id="pj-video-tiempo" class="video-tiempo">0:00 / --:--</span></div>
+              <input type="range" id="pj-progreso-video" min="0" max="100" value="0" style="margin-bottom:5px">
+              <div class="fila-btn">
+                <button class="btn btn-verde btn-sm"   onclick="pjMedia.videoPlay()">▶ Play</button>
+                <button class="btn btn-naranja btn-sm" onclick="pjMedia.videoPause()">⏸ Pausa</button>
+                <button class="btn btn-gris btn-sm"    onclick="pjMedia.videoReset()">⏮ Reiniciar</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Música -->
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">🎵</span> Música</div>
+            <label class="btn btn-gris btn-sm btn-full" style="cursor:pointer;margin-bottom:6px">
+              📂 Cargar pista de audio
+              <input type="file" id="pj-input-musica" accept="audio/*" style="display:none">
+            </label>
+            <div class="musica-info">🎵 <span id="pj-nombre-pista">Ninguna</span></div>
+            <audio id="pj-audio"></audio>
+            <div class="fila-btn">
+              <button class="btn btn-verde btn-sm"   onclick="pjPlayMusica()">▶ Play</button>
+              <button class="btn btn-naranja btn-sm" onclick="pjPausaMusica()">⏸ Pausa</button>
+              <button class="btn btn-rojo btn-sm"    onclick="pjStopMusica()">■ Stop</button>
+            </div>
+            <input type="range" id="pj-progreso-musica" min="0" max="100" value="0" style="margin-bottom:6px">
+            <div class="vol-row">
+              <label>Volumen</label>
+              <input type="range" id="pj-vol-musica" min="0" max="100" value="60" oninput="pjVolMusica(this.value)" style="flex:1">
+              <span class="vol-label" id="pj-vol-musica-lbl">60%</span>
+            </div>
+          </div>
+
+          <!-- SFX -->
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">🔊</span> Efectos de Sonido</div>
+            <div id="pj-sfx-lista" class="sfx-lista"></div>
+            <div class="vol-row" style="margin-top:8px">
+              <label>Volumen</label>
+              <input type="range" id="pj-vol-sfx" min="0" max="100" value="70" style="flex:1">
+              <span class="vol-label" id="pj-vol-sfx-lbl">70%</span>
+            </div>
+          </div>
+
+        </div><!-- /col-der -->
+      </div>
+    </div><!-- /tab-precio-justo -->
+
+    <!-- ════════════════════════════════════════════════
+         PESTAÑA: EL ROSCO
+    ════════════════════════════════════════════════ -->
+    <div id="tab-rosco" class="tab-panel">
+      <div class="rosco-layout">
+
+        <!-- ── COLUMNA IZQUIERDA: editor de letras ── -->
+        <div class="rosco-col-editor">
+
+          <!-- Resumen mini -->
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">🌸</span> Estado del Rosco</div>
+            <div id="rosco-resumen"></div>
+          </div>
+
+          <!-- Editor de letras -->
+          <div class="card" style="flex:1">
+            <div class="card-title"><span class="ct-icon">📝</span> Preguntas por Letra</div>
+            <div id="rosco-editor-letras" class="rosco-editor-lista"></div>
+          </div>
+
+        </div>
+
+        <!-- ── COLUMNA CENTRAL: controles ── -->
+        <div class="rosco-col-controles">
+
+          <div class="card">
+            <button class="btn-enviar-overlay" onclick="roscoActivarModo()">
+              📤 ACTIVAR ROSCO EN OVERLAY
+            </button>
+          </div>
+
+          <!-- Escalera mini -->
+          <div class="card">
+            <div class="esc-mini-slot"></div>
+          </div>
+
+          <!-- Comodines -->
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">🃏</span> Comodines</div>
+            <div class="com-mini-slot" data-modo="rosco"></div>
+          </div>
+
+          <!-- Navegación -->
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">🎮</span> Control en Directo</div>
+            <div class="fila-btn">
+              <button class="btn btn-gris btn-sm" onclick="roscoAnterior()">◀ Anterior</button>
+              <button class="btn btn-gris btn-sm" onclick="roscoSiguiente()">Siguiente ▶</button>
+            </div>
+            <div class="fila-btn" style="margin-top:4px">
+              <button class="btn btn-naranja btn-full" onclick="roscoPasar()" style="font-size:16px">→ PASAR</button>
+            </div>
+            <div class="fila-btn" style="margin-top:4px">
+              <button class="btn btn-verde" onclick="roscoCorrecta()" style="flex:1;font-size:15px">✔ CORRECTA</button>
+              <button class="btn btn-rojo"  onclick="roscoFallada()"  style="flex:1;font-size:15px">✗ FALLADA</button>
+            </div>
+            <div style="border-top:1px solid var(--border);margin-top:10px;padding-top:10px">
+              <div class="fila-btn">
+                <button class="btn btn-dorado btn-full" onclick="roscoMostrar()">▶ Mostrar / Actualizar Overlay</button>
+              </div>
+              <div class="fila-btn">
+                <button class="btn btn-gris btn-sm" onclick="roscoReset()">↺ Reset letras</button>
+                <button class="btn btn-rojo btn-sm"  onclick="roscoLimpiar()">✕ Limpiar overlay</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Timer -->
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">⏱</span> Temporizador</div>
+            <div class="timer-display" id="rosco-display-tiempo">30</div>
+            <div class="timer-barra"><div class="timer-progreso" id="rosco-barra-tiempo" style="width:100%"></div></div>
+            <div class="timer-config">
+              <label>Seg.</label>
+              <input type="number" id="rosco-input-tiempo" value="30" min="5" max="600">
+              <button class="btn btn-gris btn-sm" onclick="roscoTimer.reset()">↺</button>
+            </div>
+            <div class="fila-btn">
+              <button class="btn btn-verde btn-sm" id="rosco-btn-iniciar" onclick="roscoTimer.iniciar()">▶</button>
+              <button class="btn btn-naranja btn-sm" onclick="roscoTimer.pausar()">⏸</button>
+              <button class="btn btn-rojo btn-sm"    onclick="roscoTimer.detener()">■</button>
+            </div>
+            <div style="border-top:1px solid var(--border);padding-top:8px;margin-top:4px">
+              <button class="btn btn-gris btn-sm" id="rosco-btn-timer-overlay" onclick="roscoTimer.toggleVisible()" style="width:100%">⏱ Mostrar Timer en Overlay</button>
+            </div>
+          </div>
+
+          <!-- Música -->
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">🎵</span> Música</div>
+            <label class="btn btn-gris btn-sm btn-full" style="cursor:pointer;margin-bottom:6px">
+              📂 Cargar pista de audio
+              <input type="file" id="rosco-input-musica" accept="audio/*" style="display:none">
+            </label>
+            <div class="musica-info">🎵 <span id="rosco-nombre-pista">Ninguna</span></div>
+            <audio id="rosco-audio"></audio>
+            <div class="fila-btn">
+              <button class="btn btn-verde btn-sm"   onclick="roscoPlayMusica()">▶</button>
+              <button class="btn btn-naranja btn-sm" onclick="roscoPausaMusica()">⏸</button>
+              <button class="btn btn-rojo btn-sm"    onclick="roscoStopMusica()">■</button>
+            </div>
+            <input type="range" id="rosco-progreso-musica" min="0" max="100" value="0" style="margin-bottom:4px">
+            <div class="vol-row">
+              <label>Vol</label>
+              <input type="range" id="rosco-vol-musica" min="0" max="100" value="60" oninput="roscoVolMusica(this.value)" style="flex:1">
+              <span class="vol-label" id="rosco-vol-musica-lbl">60%</span>
+            </div>
+          </div>
+
+          <!-- SFX -->
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">🔊</span> SFX</div>
+            <div id="rosco-sfx-lista" class="sfx-lista"></div>
+            <div class="vol-row" style="margin-top:6px">
+              <label>Vol</label>
+              <input type="range" id="rosco-vol-sfx" min="0" max="100" value="70" style="flex:1">
+              <span class="vol-label" id="rosco-vol-sfx-lbl">70%</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── COLUMNA DERECHA: sets / multimedia ── -->
+        <div class="rosco-col-extra">
+
+          <!-- Sets de preguntas -->
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">📚</span> Sets de Preguntas</div>
+            <p style="font-size:11px;color:var(--text-muted);margin-bottom:8px">Guarda el set actual con un nombre para reutilizarlo.</p>
+            <div class="media-input-row">
+              <input type="text" id="rosco-nuevo-set" placeholder="Nombre del set…" style="margin:0;flex:1">
+              <button class="btn btn-dorado btn-sm" onclick="roscoGuardarSet()">💾</button>
+            </div>
+            <div id="rosco-sets-lista" class="banco-lista" style="margin-top:8px;max-height:200px"></div>
+            <div class="fila-btn" style="margin-top:8px">
+              <button class="btn btn-gris btn-sm" onclick="roscoExportarSet()">📤 Exportar JSON</button>
+              <label class="btn btn-gris btn-sm" style="cursor:pointer">
+                📥 Importar
+                <input type="file" accept=".json" onchange="roscoImportarSet(event)" style="display:none">
+              </label>
+            </div>
+          </div>
+
+          <!-- Multimedia -->
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">📺</span> Multimedia</div>
+            <label>Selección rápida</label>
+            <div id="rosco-biblioteca-grid" class="biblioteca-grid"></div>
+            <label style="margin-top:8px">URL o archivo</label>
+            <div class="media-input-row">
+              <input type="text" id="rosco-input-multimedia" placeholder="https://..." style="margin:0;flex:1">
+              <button class="btn btn-gris btn-sm" onclick="roscoMedia.seleccionarArchivo()">📂</button>
+            </div>
+            <input type="file" id="rosco-file-multimedia" accept="image/*,video/*" style="display:none">
+            <input type="hidden" id="rosco-tipo-media-auto" value="">
+            <div class="fila-btn" style="margin-top:6px">
+              <button class="btn btn-gris btn-sm" onclick="roscoMedia.lanzar('imagen')">🖼️</button>
+              <button class="btn btn-rojo btn-sm"  onclick="roscoMedia.lanzar('youtube')">▶ YT</button>
+              <button class="btn btn-azul btn-sm"  onclick="roscoMedia.lanzar('video')">🎬</button>
+              <button class="btn btn-gris btn-sm"  onclick="roscoMedia.cerrar()">✕</button>
+            </div>
+            <div id="rosco-video-controles" style="display:none">
+              <div class="video-progress-row"><span id="rosco-video-tiempo" class="video-tiempo">0:00 / --:--</span></div>
+              <input type="range" id="rosco-progreso-video" min="0" max="100" value="0" style="margin-bottom:5px">
+              <div class="fila-btn">
+                <button class="btn btn-verde btn-sm"   onclick="roscoMedia.videoPlay()">▶</button>
+                <button class="btn btn-naranja btn-sm" onclick="roscoMedia.videoPause()">⏸</button>
+                <button class="btn btn-gris btn-sm"    onclick="roscoMedia.videoReset()">⏮</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div><!-- /tab-rosco -->
+
+    <!-- ════════════════════════════════════════════════
+         OTRAS PESTAÑAS (placeholders)
+    ════════════════════════════════════════════════ -->
+    <div id="tab-biblioteca" class="tab-panel">
+      <div class="bib-layout">
+
+        <!-- ── SIDEBAR: acciones y filtros ── -->
+        <div class="bib-sidebar">
+
+          <!-- Subir archivos -->
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">📤</span> Añadir Archivos</div>
+
+            <!-- Zona drag & drop -->
+            <div id="bib-drop-zona" class="bib-drop-zona" onclick="bibAbrirSelector()">
+              <div class="bib-drop-icon">📂</div>
+              <div class="bib-drop-texto">
+                <strong>Haz clic o arrastra archivos aquí</strong><br>
+                <span>Imágenes, vídeos y audios</span>
+              </div>
+            </div>
+            <input type="file" id="bib-file-input" multiple
+              accept="image/*,video/*,audio/*"
+              style="display:none" onchange="bibOnFileInput(event)">
+          </div>
+
+          <!-- Añadir YouTube -->
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">▶</span> Añadir YouTube</div>
+            <label>Enlace del vídeo</label>
+            <input type="text" id="bib-yt-url" placeholder="https://youtube.com/watch?v=...">
+            <label>Nombre (opcional)</label>
+            <input type="text" id="bib-yt-nombre" placeholder="Ej: Intro del programa">
+            <button class="btn btn-rojo btn-full" onclick="bibAñadirYoutube()">+ Añadir a biblioteca</button>
+          </div>
+
+          <!-- Importar / Exportar -->
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">💾</span> Exportar / Importar</div>
+            <div class="fila-btn">
+              <button class="btn btn-gris btn-sm btn-full" onclick="bibExportar()">📤 Exportar lista</button>
+            </div>
+            <label class="btn btn-gris btn-sm btn-full" style="cursor:pointer;margin-top:4px">
+              📥 Importar lista
+              <input type="file" accept=".json" onchange="bibImportar(event)" style="display:none">
+            </label>
+            <p style="font-size:11px;color:var(--text-muted);margin-top:8px;line-height:1.5">
+              💡 Los archivos subidos solo duran la sesión. Exportar guarda los metadatos y los enlaces permanentes (YouTube, URLs).
+            </p>
+          </div>
+
+        </div>
+
+        <!-- ── CONTENIDO PRINCIPAL: grid de archivos ── -->
+        <div class="bib-main">
+
+          <!-- Toolbar: filtros + búsqueda -->
+          <div class="bib-toolbar">
+            <div class="bib-filtros">
+              <button class="bib-filtro-btn activo" data-filtro="todos"   onclick="bibSetFiltro('todos')">Todos</button>
+              <button class="bib-filtro-btn"        data-filtro="imagen"  onclick="bibSetFiltro('imagen')">🖼️ Imágenes</button>
+              <button class="bib-filtro-btn"        data-filtro="video"   onclick="bibSetFiltro('video')">🎬 Vídeos</button>
+              <button class="bib-filtro-btn"        data-filtro="audio"   onclick="bibSetFiltro('audio')">🎵 Audios</button>
+              <button class="bib-filtro-btn"        data-filtro="youtube" onclick="bibSetFiltro('youtube')">▶ YouTube</button>
+            </div>
+            <div class="bib-busqueda-wrap">
+              <input type="text" id="bib-busqueda" placeholder="🔍 Buscar por nombre…" style="margin:0">
+              <span id="bib-contador" class="bib-contador">0 elementos</span>
+            </div>
+          </div>
+
+          <!-- Grid -->
+          <div id="bib-grid" class="bib-grid"></div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <div id="tab-personalizacion" class="tab-panel">
+      <div class="pers-layout-v2">
+
+        <!-- ══ COL 1: Nombre + Colores + Perfiles ══ -->
+        <div class="pers-col-v2">
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">📛</span> Programa</div>
+            <label>Nombre</label>
+            <input type="text" id="pers-nombre" value="KONKURSOX" maxlength="40">
+            <label>Subtítulo</label>
+            <input type="text" id="pers-subtitulo" value="¿Tú le sabes FR FR?" maxlength="60">
+            <div class="pers-preview-titulo" style="margin-top:8px">
+              <div class="pers-prev-nombre" id="pers-prev-nombre">KONKURSOX</div>
+              <div class="pers-prev-sub"    id="pers-prev-sub">¿Tú le sabes FR FR?</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">🎨</span> Colores</div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div class="pers-color-compact"><label>Acento principal</label><div class="pers-color-inputs"><input type="color" id="pers-color-dorado" value="#f0a500"><input type="text" id="pers-color-hex-dorado" value="#f0a500" class="pers-hex-input" maxlength="7"></div></div>
+              <div class="pers-color-compact"><label>Correcto</label><div class="pers-color-inputs"><input type="color" id="pers-color-verde" value="#2ecc71"><input type="text" id="pers-color-hex-verde" value="#2ecc71" class="pers-hex-input" maxlength="7"></div></div>
+              <div class="pers-color-compact"><label>Incorrecto</label><div class="pers-color-inputs"><input type="color" id="pers-color-rojo" value="#e74c3c"><input type="text" id="pers-color-hex-rojo" value="#e74c3c" class="pers-hex-input" maxlength="7"></div></div>
+              <div class="pers-color-compact"><label>Acento 2</label><div class="pers-color-inputs"><input type="color" id="pers-color-azul" value="#3498db"><input type="text" id="pers-color-hex-azul" value="#3498db" class="pers-hex-input" maxlength="7"></div></div>
+              <div class="pers-color-compact"><label>Fondo overlay</label><div class="pers-color-inputs"><input type="color" id="pers-color-fondo" value="#0c0e13"><input type="text" id="pers-color-hex-fondo" value="#0c0e13" class="pers-hex-input" maxlength="7"></div></div>
+            </div>
+            <div class="fila-btn" style="margin-top:10px">
+              <button class="btn-enviar-overlay" onclick="persAplicar()" style="flex:1">✅ APLICAR</button>
+              <button class="btn btn-gris" onclick="persReset()">↺</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">💾</span> Perfiles de Estilo</div>
+            <div class="media-input-row">
+              <input type="text" id="pers-nuevo-perfil" placeholder="Nombre del perfil…" style="margin:0;flex:1">
+              <button class="btn btn-dorado btn-sm" onclick="persGuardarPerfil()">💾</button>
+            </div>
+            <div id="pers-perfiles-lista" class="banco-lista" style="margin-top:8px;max-height:180px">
+              <div class="banco-vacio">Sin perfiles guardados.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══ COL 2: Tamaño texto + SFX ══ -->
+        <div class="pers-col-v2">
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">🔡</span> Tamaño de Texto</div>
+            <p style="font-size:11px;color:var(--text-muted);margin-bottom:10px;line-height:1.5">Cambios en tiempo real al overlay.</p>
+            <div style="display:flex;flex-direction:column;gap:7px">
+              <div><label>Pregunta (TT / S-N / PJ) <span id="ov-sz-pregunta-lbl" style="color:var(--dorado)">30px</span></label><input type="range" id="ov-sz-pregunta" min="16" max="60" value="30" oninput="ovSzUpdate('pregunta',this.value)"></div>
+              <div><label>Opciones Tipo Test <span id="ov-sz-opciones-lbl" style="color:var(--dorado)">20px</span></label><input type="range" id="ov-sz-opciones" min="12" max="48" value="20" oninput="ovSzUpdate('opciones',this.value)"></div>
+              <div><label>Opciones Sí/No <span id="ov-sz-opciones-sn-lbl" style="color:var(--dorado)">48px</span></label><input type="range" id="ov-sz-opciones-sn" min="20" max="100" value="48" oninput="ovSzUpdate('opciones-sn',this.value)"></div>
+              <div><label>Número Precio Justo <span id="ov-sz-precio-lbl" style="color:var(--dorado)">110px</span></label><input type="range" id="ov-sz-precio" min="48" max="180" value="110" oninput="ovSzUpdate('precio',this.value)"></div>
+              <div><label>Letra Rosco <span id="ov-sz-rosco-lbl" style="color:var(--dorado)">200px</span></label><input type="range" id="ov-sz-rosco" min="80" max="300" value="200" oninput="ovSzUpdate('rosco',this.value)"></div>
+              <div><label>Pregunta Rosco <span id="ov-sz-rosco-preg-lbl" style="color:var(--dorado)">36px</span></label><input type="range" id="ov-sz-rosco-preg" min="16" max="72" value="36" oninput="ovSzUpdate('rosco-preg',this.value)"></div>
+              <div><label>Escalera de premios <span id="ov-sz-escalera-lbl" style="color:var(--dorado)">16px</span></label><input type="range" id="ov-sz-escalera" min="10" max="36" value="16" oninput="ovSzUpdate('escalera',this.value)"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">🔊</span> Sonidos del Sistema</div>
+            <p style="font-size:11px;color:var(--text-muted);margin-bottom:8px;line-height:1.5">Asigna un MP3 propio a cada evento.</p>
+            <div id="sfx-sis-lista"></div>
+          </div>
+        </div>
+
+        <!-- ══ COL 3: Comodines ══ -->
+        <div class="pers-col-v2">
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">🃏</span> Comodines</div>
+            <p style="font-size:11px;color:var(--text-muted);margin-bottom:10px;line-height:1.5">
+              Arrastra <strong>⠿</strong> para reordenar.<br>
+              El campo de emoji acepta cualquier emoji que pegues o escribas.<br>
+              Marca los modos donde está disponible (TT=Tipo Test, SN=Sí/No, PJ=Precio Justo, R=Rosco).
+            </p>
+            <div id="com-editor-lista" class="com-editor-lista"></div>
+            <div class="fila-btn" style="margin-top:8px">
+              <button class="btn btn-dorado btn-sm" onclick="comAñadir()">+ Añadir comodín</button>
+              <button class="btn btn-gris btn-sm"   onclick="comResetear()">↺ Reset</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══ COL 4: Escalera ══ -->
+        <div class="pers-col-v2">
+          <div class="card">
+            <div class="card-title"><span class="ct-icon">🏆</span> Escalera de Premios</div>
+            <p style="font-size:11px;color:var(--text-muted);margin-bottom:8px;line-height:1.5">De arriba (mayor) a abajo (menor).</p>
+            <div id="esc-editor-lista" class="esc-editor-lista"></div>
+            <div class="fila-btn" style="margin-top:8px">
+              <button class="btn btn-dorado btn-sm" onclick="escAñadirPeldano()">+ Añadir</button>
+              <button class="btn btn-gris btn-sm"   onclick="escResetearDefaults()">↺ Reset</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /contenido-tabs -->
+</div><!-- /app -->
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<!-- Scripts -->
+<script src="js/db.js"></script>
+<script src="js/core.js"></script>
+<script src="js/global-music.js"></script>
+<script src="js/global-escalera.js"></script>
+<script src="js/global-sfx-sistema.js"></script>
+<script src="js/global-comodines.js"></script>
+<script src="js/global-escala.js"></script>
+<script src="js/shared-media.js"></script>
+<script src="js/shared-timer.js"></script>
+<script src="js/tab-camaras.js"></script>
+<script src="js/tab-tipo-test.js"></script>
+<script src="js/tab-si-no.js"></script>
+<script src="js/shared-sfx.js"></script>
+<script src="js/tab-personalizacion.js"></script>
+<script src="js/tab-precio-justo.js"></script>
+<script src="js/tab-rosco.js"></script>
+<script src="js/tab-biblioteca.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    gmInit();
+    escInit();
+    sfxSisInit();
+    comInit();
+    ovEscalaInit();
+    initCamaras();
+    initTipoTest();
+    initSiNo();
+    initPersonalizacion();
+    initPrecioJusto();
+    initRosco();
+    initBiblioteca();
+    const tabs = document.querySelectorAll('.tab-btn[data-tab]');
+    tabs.forEach(btn => {
+      if (!btn.classList.contains('placeholder')) {
+        btn.addEventListener('click', () => cambiarTab(btn.dataset.tab));
+      }
+    });
+    cambiarTab('camaras');
+  });
+
+  function cambiarTab(id) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('activa'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('activa'));
+    const btn   = document.querySelector(`.tab-btn[data-tab="${id}"]`);
+    const panel = document.getElementById(`tab-${id}`);
+    if (btn)   btn.classList.add('activa');
+    if (panel) panel.classList.add('activa');
+  }
+</script>
+
+</body>
+</html>

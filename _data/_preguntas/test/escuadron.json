@@ -1,0 +1,332 @@
+[
+  {
+    "id": 1,
+    "pregunta": "En la legendaria 'Guerra del Papeadito', ¿qué frase repetía constantemente Marcos para defenderse del spam de Nico?",
+    "opciones": [
+      "Calla papeadito", 
+      "Con quien está hablando este chico..? 🫵🤣🤷‍♂️", 
+      "Buen chico", 
+      "Airon Merluza"
+    ],
+    "correcta": 1
+  },
+  {
+    "id": 2,
+    "pregunta": "Cuando Marcos se autoproclama 'Aironmen' y manda fotos para probarlo, ¿con qué apodo marino le bautiza Nico para cortarle el rollo?",
+    "opciones": [
+      "Airon Salmón", 
+      "Airon Merluza", 
+      "Airon Gamba", 
+      "Airon Pulpo"
+    ],
+    "correcta": 1
+  },
+  {
+    "id": 3,
+    "pregunta": "Durante la época de exámenes de julio, tras sacar un 2,1 en Térmica, ¿cuál es el consejo filosófico definitivo que Nico le da al grupo?",
+    "opciones": [
+      "El esfuerzo nunca es en vano", 
+      "Madurar es aceptar que suspendes", 
+      "Aprovecha y ríndete", 
+      "Si la vida te da limones, haz limonada"
+    ],
+    "correcta": 2
+  },
+  {
+    "id": 4,
+    "pregunta": "¿Qué consulta culinaria aleatoria le hace Marcos a la IA (Meta AI) a casi las 11 de la noche en medio de una charla de sábado?",
+    "opciones": [
+      "Cómo hacer una tortilla de patatas", 
+      "Cómo preparar un buen cubata", 
+      "Cómo cocer pasta sin que se pegue", 
+      "Cómo hacer salchichas al air fryer"
+    ],
+    "correcta": 3
+  },
+  {
+    "id": 5,
+    "pregunta": "Cuando el grupo debate qué hacer de fiesta en el festival Metrópoli, ¿qué plan propone Marcos con muchísimo entusiasmo?",
+    "opciones": [
+      "Ir a la playa de madrugada", 
+      "Ir al cine borrachos", 
+      "Hacer un botellón en un parque", 
+      "Jugar al Mario Party en casa de Pablo"
+    ],
+    "correcta": 1
+  },
+  {
+    "id": 6,
+    "pregunta": "Según cuenta Pablo muy indignado en uno de sus cotilleos, ¿qué pasó cuando le presentó a una chica a Gonzalo (Gonchi) en una fiesta?",
+    "opciones": [
+      "Gonzalo no hizo nada de nada y encima le abandonó en la fiesta", 
+      "Gonzalo le tiró la bebida por encima sin querer", 
+      "Gonzalo se puso a hablarle a la chica de Fortnite toda la noche", 
+      "Gonzalo se peleó con el ex de la chica"
+    ],
+    "correcta": 0
+  },
+  {
+    "id": 7,
+    "pregunta": "Según explica Nico en agosto, ¿cuál es la razón médica por la que está 'obligatoriamente encamado'?",
+    "opciones": [
+      "Se rompió la pierna jugando al fútbol", 
+      "Se hizo un esguince bailando en Metrópoli", 
+      "Le cayó una pesa en el pie y se rompió dos dedos", 
+      "Tiene un virus estomacal muy fuerte"
+    ],
+    "correcta": 2
+  },
+  {
+    "id": 8,
+    "pregunta": "Tras la intensa charla sobre abandonar los estudios liderada por Nico, ¿qué nombre alternativo sugiere para el 'Escuadrón Molón'?",
+    "opciones": [
+      "Los Suspensos", 
+      "Escuadrón Rendidón", 
+      "El Club del 2,1", 
+      "Los Llorones"
+    ],
+    "correcta": 1
+  },
+  {
+    "id": 9,
+    "pregunta": "¿Qué frase se dicen de forma cariñosa (y algo perruna) cuando alguien obedece o accede a conectarse rápido a la Play?",
+    "opciones": [
+      "Eres un crack", 
+      "Buen chico / Good boyyy", 
+      "El mejor del mundo", 
+      "Eres el MVP"
+    ],
+    "correcta": 1
+  },
+  {
+    "id": 10,
+    "pregunta": "¿A qué videojuego afirma Pablo que tiene absoluta dependencia, quejándose de que el juego le 'manipula' y gritando que necesita su 'dopamina'?",
+    "opciones": [
+      "Minecraft", 
+      "Rocket League", 
+      "Roblox", 
+      "Fortnite"
+    ],
+    "correcta": 3
+  },
+  {
+    "id": 1,
+    "pregunta": "Al principio del todo, cuando están organizando para quedar por Codema, ¿qué cosa extraña pregunta Marcos si llevan o si la compran por el camino?",
+    "opciones": [
+      "Las entradas",
+      "La picha",
+      "El hielo",
+      "La bebida"
+    ],
+    "correcta": 1
+  },
+  {
+    "id": 2,
+    "pregunta": "Según Pablo, ¿cuál es la razón por la que Javi no puede conectarse a jugar con ellos un domingo por la tarde?",
+    "opciones": [
+      "Porque le castigó su madre sin Play",
+      "Porque tenía que limpiar el salón",
+      "Porque tenía misa",
+      "Porque se había ido a ver al Sporting"
+    ],
+    "correcta": 2
+  },
+  {
+    "id": 3,
+    "pregunta": "Cuando Nico sugiere que en vez de jugar a la Xbox se pongan a limpiar con fregona y aspiradora, ¿qué broma suelta sobre lo que le incomoda a la limpiadora?",
+    "opciones": [
+      "Que dejen toda la cocina llena de cacharros",
+      "Que se pajee en el medio del salón completamente desnudo",
+      "Que jueguen al Fornite gritando a las 3 de la mañana",
+      "Que anden con los zapatos sucios pisando lo fregado"
+    ],
+    "correcta": 1
+  },
+  {
+    "id": 4,
+    "pregunta": "¿Qué excusa o queja pone Pablo cuando la gente de la sala vota para detener la partida en el 'Juego del Calamar' dentro de Roblox?",
+    "opciones": [
+      "Que seguro que les llamó su madre a comer",
+      "Que la gente tiene miedo a morir en Roblox",
+      "Que son unos pesados y prefieren el Minecraft",
+      "Que se rindieron de no rendirse"
+    ],
+    "correcta": 1
+  },
+  {
+    "id": 5,
+    "pregunta": "¿Qué nota sacó Nico en el examen de Térmica, evento que originó toda su filosofía sobre 'rendirse'?",
+    "opciones": [
+      "Un 1,5",
+      "Un 2,1",
+      "Un 3,8",
+      "Un 4,9"
+    ],
+    "correcta": 1
+  },
+  {
+    "id": 6,
+    "pregunta": "En la discusión sobre qué hacer de fiesta por Metrópoli, Marcos dice que quiere emborracharse en la calle por un motivo muy concreto. ¿Cuál es?",
+    "opciones": [
+      "Para ahorrarse unos euros y pagarse el pase de batalla",
+      "Para que le vean los niños y se asusten",
+      "Para poder ir cantando canciones de la Voz Kids a gritos",
+      "Para sentarse en un banco a reflexionar sobre sus suspensos"
+    ],
+    "correcta": 1
+  },
+  {
+    "id": 7,
+    "pregunta": "Según las quejas de Pablo, ¿quién es el 'amo' de Gonzalo (Gonchi) al que tiene que consultarle todo antes de hacer planes?",
+    "opciones": [
+      "Puebla",
+      "Javi",
+      "Carlos",
+      "Mateo"
+    ],
+    "correcta": 3
+  },
+  {
+    "id": 8,
+    "pregunta": "Cuando Nico cuenta que está 'obligatoriamente encamado' y no puede salir, ¿qué dice que le ha pasado?",
+    "opciones": [
+      "Le cayó una pesa en el pie y se rompió dos dedos",
+      "Se tropezó de fiesta en Metrópoli y tiene un esguince",
+      "Chutó mal al balón en un partido de la shitleage",
+      "Se le cayó la nueva Xbox encima de la pierna"
+    ],
+    "correcta": 0
+  },
+  {
+    "id": 9,
+    "pregunta": "¿A qué amigo critica duramente Pablo, diciendo que es 'el tío que peina kiwis' y que reacciona poniendo 'wtf' a las cosas?",
+    "opciones": [
+      "A Gonzalo",
+      "A Nacho",
+      "A Charlie",
+      "A Hugo"
+    ],
+    "correcta": 1
+  },
+  {
+    "id": 10,
+    "pregunta": "¿Qué frase incomprensible (posiblemente por el autocorrector) suelta Pablo de la nada, provocando que Nico le conteste sorprendido 'Gotas?'?",
+    "opciones": [
+      "A qué gotas en coleg",
+      "Traéis frixuelos con gotas",
+      "Hay gotas de lluvia en el Metrópoli",
+      "Manger con gotas"
+    ],
+    "correcta": 0
+  },
+  {
+    "id": 11,
+    "pregunta": "En medio de un sábado por la noche (a las casi 23:00), ¿quién decide interrumpir el cotilleo del grupo para preguntarle a la IA cómo hacer salchichas al air fryer?",
+    "opciones": [
+      "Pablo",
+      "Mateo",
+      "Marcos",
+      "Nico"
+    ],
+    "correcta": 2
+  },
+  {
+    "id": 12,
+    "pregunta": "¿A qué juego intentan convencer a Pablo para jugar, refiriéndose a él por sus iniciales o simplemente como 'el repo'?",
+    "opciones": [
+      "Lethal Company",
+      "Content Warning",
+      "R.E.P.O.",
+      "Among Us VR"
+    ],
+    "correcta": 2
+  },
+  {
+    "id": 13,
+    "pregunta": "En pleno debate motivacional sobre no rendirse en los estudios, ¿qué frase se atreve a atribuirle Pablo a Sócrates?",
+    "opciones": [
+      "El que la sigue la consigue",
+      "No hay que castigar al que yerra, sino enseñarle.",
+      "Si te rindes no pierdes",
+      "Caer está permitido, levantarse es obligatorio"
+    ],
+    "correcta": 1
+  },
+  {
+    "id": 14,
+    "pregunta": "Cuando a Marcos se le acaban las pilas del mando jugando a Fortnite, ¿en qué 'modo' extraño dice que va a jugar a partir de ese momento?",
+    "opciones": [
+      "Modo tryhard",
+      "Modo garros",
+      "Modo espectador",
+      "Modo Aironmen"
+    ],
+    "correcta": 1
+  },
+  {
+    "id": 15,
+    "pregunta": "¿A quiénes se refiere Marcos cuando amenaza con suicidar a 'esas putas Romeo y Julieta' y dice 'Disgusting'?",
+    "opciones": [
+      "A Mateo y Gonzalo que ya no se separan para nada",
+      "A unos conocidos enchufados que mandaron fotos posando con máscaras en su curro",
+      "A la limpiadora y a su hermano",
+      "A la ex de Hugo y su nuevo novio que subieron historias de Instagram"
+    ],
+    "correcta": 1
+  },
+  {
+    "id": 16,
+    "pregunta": "En una fiesta, Pablo hace de celestino y le presenta una chica a Gonzalo. ¿Qué acaba pasando según la versión de Pablo?",
+    "opciones": [
+      "Gonzalo no hace nada en horas y encima abandona a Pablo en la fiesta",
+      "Se acaban liando pero Gonzalo le miente al grupo diciendo que no",
+      "Bailan toda la noche pero luego Gonzalo se va con Mateo",
+      "Gonzalo le perrea a una supermodelo en su lugar y se proclama MVP"
+    ],
+    "correcta": 0
+  },
+  {
+    "id": 17,
+    "pregunta": "Cuando discuten porque a uno se le acaban los datos del móvil viendo TikToks, ¿quién presume de tener 'tarifa plana de tiktoks' y estar en un 'piso superior'?",
+    "opciones": [
+      "Pablo",
+      "Marcos",
+      "Nico",
+      "Gonzalo"
+    ],
+    "correcta": 2
+  },
+  {
+    "id": 18,
+    "pregunta": "¿Cómo se llama la polémica canción de Ari Gameplays que critican duramente en el grupo y por la que 'Nintendo la ha demandado'?",
+    "opciones": [
+      "Gameboy",
+      "Skebob",
+      "Trifásica",
+      "Manivela"
+    ],
+    "correcta": 0
+  },
+  {
+    "id": 19,
+    "pregunta": "Al enterarse de que Meta AI ha sido introducida en el grupo de WhatsApp, ¿qué es lo primero que intenta hacer Nico con ella?",
+    "opciones": [
+      "Pedirle que le haga los deberes de Térmica",
+      "Decirle que banee a Pablo del grupo",
+      "Pedirle que mande a alguien a tomar por culo amablemente",
+      "Preguntarle cómo arreglar el drift de su mando"
+    ],
+    "correcta": 2
+  },
+  {
+    "id": 20,
+    "pregunta": "Tras el acoso de Nico llamándole 'Airon merluza', 'Airon nigga' y 'Airon fish', ¿con qué apodo en inglés intenta contraatacar Marcos para insultarle?",
+    "opciones": [
+      "CopperDick",
+      "SilverBalls",
+      "GoldenNuv",
+      "Capitán Calamar"
+    ],
+    "correcta": 0
+  }
+]

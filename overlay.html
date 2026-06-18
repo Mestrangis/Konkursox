@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>KONKURSOX — Overlay v2</title>
+  <!--
+  ╔══════════════════════════════════════════════════════╗
+  ║  KONKURSOX — OVERLAY v2                              ║
+  ║  OBS: Fuente → Captura de navegador                  ║
+  ║  URL: file:///ruta/a/overlay.html                    ║
+  ║  Anchura: 1920  Altura: 1080                         ║
+  ╚══════════════════════════════════════════════════════╝
+  -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/overlay.css">
+</head>
+<body>
+<div id="overlay-root">
+
+  <div id="fondo"></div>
+
+  <!-- Contenedor escalable: todo excepto las cámaras -->
+  <div id="ov-contenido-escalable">
+
+  <div id="titulo-programa">
+    <div class="nombre">KONKURSOX</div>
+    <div class="subtitulo">¿Tú le sabes FR FR?</div>
+  </div>
+
+  <div id="temporizador-circular">
+    <svg class="timer-svg" viewBox="0 0 100 100">
+      <circle class="timer-bg"   cx="50" cy="50" r="45"/>
+      <circle class="timer-ring" id="ring-timer" cx="50" cy="50" r="45"/>
+    </svg>
+    <div class="timer-numero" id="num-timer">30</div>
+  </div>
+
+  <!-- Cámaras: el contenido se genera dinámicamente por overlay.js -->
+  <div id="contenedor-camaras"></div>
+
+  <!-- Panel Sí/No — posicionado abajo -->
+  <div id="panel-si-no">
+    <div id="sn-caja-pregunta">
+      <p id="sn-texto-pregunta"></p>
+    </div>
+    <div id="sn-comodines-bar" class="comodines-bar"></div>
+    <div id="sn-grid-opciones">
+      <!-- Generado por overlay.js -->
+    </div>
+  </div>
+
+  <!-- Panel Precio Justo -->
+  <div id="panel-precio-justo">
+    <div id="pj-contenido-objeto">
+      <div id="pj-imagen-wrap"><img id="pj-imagen" src="" alt="" style="display:none"></div>
+      <div id="pj-texto-objeto"></div>
+    </div>
+    <div id="pj-valor-display">
+      <div id="pj-valor-numero"></div>
+      <div id="pj-valor-real-wrap" style="display:none">
+        <div id="pj-separador-valor">→</div>
+        <div id="pj-valor-real-numero"></div>
+      </div>
+    </div>
+    <div id="pj-pista-wrap" style="display:none">
+      <div id="pj-pista-flecha"></div>
+      <div id="pj-pista-texto"></div>
+    </div>
+  </div>
+
+  <!-- Panel El Rosco -->
+  <div id="panel-rosco">
+    <div id="rosco-lista-overlay"></div>
+    <div id="rosco-pregunta-actual">
+      <div id="rosco-letra-grande"></div>
+      <div id="rosco-pregunta-texto"></div>
+    </div>
+  </div>
+
+  <!-- Panel tipo test (preguntas) — posicionado abajo -->
+  <div id="panel-tipo-test">
+    <div id="caja-pregunta">
+      <p id="texto-pregunta"></p>
+    </div>
+    <div id="tt-comodines-bar" class="comodines-bar"></div>
+    <div id="grid-opciones"></div>
+  </div>
+
+  <div id="panel-multimedia">
+    <div id="contenido-multimedia"></div>
+  </div>
+
+  <!-- Escalera de premios -->
+  <div id="panel-escalera">
+    <div id="escalera-lista"></div>
+  </div>
+
+  <div id="mensaje-estado"></div>
+
+  </div><!-- /ov-contenido-escalable -->
+
+</div>
+<script src="js/overlay.js"></script>
+</body>
+</html>

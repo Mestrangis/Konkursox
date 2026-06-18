@@ -1,0 +1,182 @@
+[
+  {
+    "id": 1,
+    "pregunta": "¿Cuál es el río más largo y caudaloso del mundo?",
+    "opciones": ["Río Nilo", "Río Amazonas", "Río Yangtsé", "Río Misisipi"],
+    "correcta": 1
+  },
+  {
+    "id": 2,
+    "pregunta": "¿Quién pintó la famosa obra de arte 'La Mona Lisa'?",
+    "opciones": ["Vincent van Gogh", "Pablo Picasso", "Leonardo da Vinci", "Claude Monet"],
+    "correcta": 2
+  },
+  {
+    "id": 3,
+    "pregunta": "¿Cuál es el planeta más grande de nuestro sistema solar?",
+    "opciones": ["Marte", "Júpiter", "Saturno", "Venus"],
+    "correcta": 1
+  },
+  {
+    "id": 4,
+    "pregunta": "¿En qué año pisó el hombre la Luna por primera vez?",
+    "opciones": ["1965", "1969", "1972", "1959"],
+    "correcta": 1
+  },
+  {
+    "id": 5,
+    "pregunta": "¿Cuál es la capital de Australia?",
+    "opciones": ["Sídney", "Melbourne", "Canberra", "Brisbane"],
+    "correcta": 2
+  },
+  {
+    "id": 6,
+    "pregunta": "¿Quién escribió la novela 'Don Quijote de la Mancha'?",
+    "opciones": ["Gabriel García Márquez", "Miguel de Cervantes", "Lope de Vega", "Francisco de Quevedo"],
+    "correcta": 1
+  },
+  {
+    "id": 7,
+    "pregunta": "¿Cuál es el elemento químico representado por el símbolo 'O'?",
+    "opciones": ["Oro", "Osmio", "Oxígeno", "Oganesón"],
+    "correcta": 2
+  },
+  {
+    "id": 8,
+    "pregunta": "¿Qué país europeo tiene forma de bota?",
+    "opciones": ["Grecia", "España", "Francia", "Italia"],
+    "correcta": 3
+  },
+  {
+    "id": 9,
+    "pregunta": "¿Cuál es el océano más grande del mundo?",
+    "opciones": ["Océano Atlántico", "Océano Índico", "Océano Ártico", "Océano Pacífico"],
+    "correcta": 3
+  },
+  {
+    "id": 10,
+    "pregunta": "¿En qué año comenzó la Segunda Guerra Mundial?",
+    "opciones": ["1914", "1939", "1945", "1929"],
+    "correcta": 1
+  },
+  {
+    "id": 11,
+    "pregunta": "¿Cuál es el animal terrestre más rápido del mundo?",
+    "opciones": ["León", "Guepardo", "Tigre", "Leopardo"],
+    "correcta": 1
+  },
+  {
+    "id": 12,
+    "pregunta": "¿Quién es el autor de la teoría de la relatividad?",
+    "opciones": ["Isaac Newton", "Galileo Galilei", "Nikola Tesla", "Albert Einstein"],
+    "correcta": 3
+  },
+  {
+    "id": 13,
+    "pregunta": "¿Cuál es la montaña más alta del planeta Tierra?",
+    "opciones": ["K2", "Monte Everest", "Kilimanjaro", "Mont Blanc"],
+    "correcta": 1
+  },
+  {
+    "id": 14,
+    "pregunta": "¿Qué gas respiramos los seres humanos y es vital para nuestra supervivencia?",
+    "opciones": ["Dióxido de carbono", "Nitrógeno", "Oxígeno", "Hidrógeno"],
+    "correcta": 2
+  },
+  {
+    "id": 15,
+    "pregunta": "¿Cuál es el continente más poblado del mundo?",
+    "opciones": ["Europa", "África", "Asia", "América"],
+    "correcta": 2
+  },
+  {
+    "id": 16,
+    "pregunta": "¿Cuál es el idioma con más hablantes nativos a nivel mundial?",
+    "opciones": ["Inglés", "Español", "Chino Mandarín", "Hindi"],
+    "correcta": 2
+  },
+  {
+    "id": 17,
+    "pregunta": "¿A qué famoso pintor pertenece el cuadro 'El Guernica'?",
+    "opciones": ["Salvador Dalí", "Diego Velázquez", "Francisco de Goya", "Pablo Picasso"],
+    "correcta": 3
+  },
+  {
+    "id": 18,
+    "pregunta": "¿Cuál es el hueso más largo del cuerpo humano?",
+    "opciones": ["Fémur", "Tibia", "Peroné", "Húmero"],
+    "correcta": 0
+  },
+  {
+    "id": 19,
+    "pregunta": "¿Cuál es la moneda oficial de Japón?",
+    "opciones": ["Yuan", "Yen", "Won", "Dólar"],
+    "correcta": 1
+  },
+  {
+    "id": 20,
+    "pregunta": "¿Qué órgano del cuerpo humano es el encargado de bombear la sangre?",
+    "opciones": ["Cerebro", "Pulmones", "Hígado", "Corazón"],
+    "correcta": 3
+  },
+  {
+    "id": 21,
+    "pregunta": "¿Qué famoso científico formuló las leyes del movimiento y la gravedad universal?",
+    "opciones": ["Albert Einstein", "Marie Curie", "Isaac Newton", "Stephen Hawking"],
+    "correcta": 2
+  },
+  {
+    "id": 22,
+    "pregunta": "¿Cuál es el país más grande del mundo por superficie?",
+    "opciones": ["China", "Estados Unidos", "Canadá", "Rusia"],
+    "correcta": 3
+  },
+  {
+    "id": 23,
+    "pregunta": "¿En qué país se encuentran las famosas pirámides de Guiza?",
+    "opciones": ["México", "Perú", "Egipto", "Grecia"],
+    "correcta": 2
+  },
+  {
+    "id": 24,
+    "pregunta": "¿Quién fue el primer presidente de los Estados Unidos?",
+    "opciones": ["Thomas Jefferson", "Abraham Lincoln", "George Washington", "John Adams"],
+    "correcta": 2
+  },
+  {
+    "id": 25,
+    "pregunta": "¿Cuál es el metal más caro del mundo?",
+    "opciones": ["Oro", "Platino", "Rodio", "Plata"],
+    "correcta": 2
+  },
+  {
+    "id": 26,
+    "pregunta": "¿Qué instrumento se utiliza para medir la presión atmosférica?",
+    "opciones": ["Termómetro", "Barómetro", "Anemómetro", "Higrómetro"],
+    "correcta": 1
+  },
+  {
+    "id": 27,
+    "pregunta": "¿Qué artista renacentista pintó el techo de la Capilla Sixtina en el Vaticano?",
+    "opciones": ["Leonardo da Vinci", "Rafael", "Donatello", "Miguel Ángel"],
+    "correcta": 3
+  },
+  {
+    "id": 28,
+    "pregunta": "¿Cuál es el ave actual que pone los huevos más grandes?",
+    "opciones": ["Águila", "Avestruz", "Cóndor", "Pingüino"],
+    "correcta": 1
+  },
+  {
+    "id": 29,
+    "pregunta": "¿En qué continente se encuentra el desierto del Sahara?",
+    "opciones": ["Asia", "América", "África", "Oceanía"],
+    "correcta": 2
+  },
+  {
+    "id": 30,
+    "pregunta": "¿Qué vitamina sintetiza nuestro cuerpo principalmente a través de la exposición a la luz solar?",
+    "opciones": ["Vitamina A", "Vitamina C", "Vitamina D", "Vitamina E"],
+    "correcta": 2
+  }
+]
